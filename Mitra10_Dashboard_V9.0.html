@@ -1,0 +1,516 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard Kontrol Member - Mitra10 Bitung Cikupa</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#0b1220;--card:#131c31cc;--bd:#25334f;--tx:#e8eef9;--mu:#8fa0bf;--or:#ff6a13;--bl:#2f7bff;--gr:#22c55e;--rd:#ef4444;--yl:#facc15}
+*{box-sizing:border-box}body{margin:0;font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif;color:var(--tx);background:linear-gradient(120deg,#0b1220,#101a35,#1a1030,#0b1220);background-size:300% 300%;animation:bg 22s ease infinite;min-height:100vh}
+@keyframes bg{50%{background-position:100% 50%}}#fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+#app,#login{position:relative;z-index:1}a{color:inherit}
+header{display:flex;gap:14px;align-items:center;padding:10px 18px;border-bottom:1px solid var(--bd);background:#0b1220cc;backdrop-filter:blur(8px);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px}.logo b{font-size:17px;letter-spacing:.3px}.logo small{display:block;color:var(--mu);font-size:11px}
+.live{width:9px;height:9px;border-radius:50%;background:var(--gr);display:inline-block;animation:pl 1.4s infinite;margin-right:6px}@keyframes pl{0%{box-shadow:0 0 0 0 #22c55e99}100%{box-shadow:0 0 0 10px #22c55e00}}
+.upd{margin-left:auto;text-align:right;font-size:12px;color:var(--mu)}.upd b{color:var(--tx)}
+.wrap{display:flex;min-height:calc(100vh - 62px)}nav{width:218px;padding:12px;border-right:1px solid var(--bd);flex-shrink:0}
+nav button{display:flex;gap:8px;width:100%;text-align:left;background:none;border:0;color:var(--mu);padding:10px 12px;border-radius:10px;cursor:pointer;font-size:13.5px;margin-bottom:3px;transition:.2s}
+nav button:hover{background:#1b2744;color:var(--tx);transform:translateX(3px)}nav button.on{background:linear-gradient(90deg,var(--or),#ff9d4d);color:#fff;font-weight:600}
+main{flex:1;padding:18px;min-width:0;animation:fi .5s}@keyframes fi{from{opacity:0;transform:translateY(8px)}}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;backdrop-filter:blur(6px);transition:.25s}.card:hover{border-color:var(--or);box-shadow:0 0 22px #ff6a1325}
+.card h3{margin:0 0 10px;font-size:14px;color:#cfe0ff}.kpi{cursor:pointer}.kpi small{color:var(--mu)}.kpi .v{font-size:24px;font-weight:700;margin-top:2px}
+.tw{overflow:auto;max-height:560px;border-radius:10px}table{width:100%;border-collapse:collapse;font-size:12.5px}th{position:sticky;top:0;background:#1a2540;text-align:left;padding:8px;white-space:nowrap;z-index:1}
+td{padding:7px 8px;border-top:1px solid #1f2c47;vertical-align:top}tr:hover td{background:#18233e}.r{text-align:right}
+.b{border:0;border-radius:8px;padding:6px 11px;cursor:pointer;color:#fff;background:var(--bl);font-size:12.5px;transition:.2s}.b:hover{filter:brightness(1.2);transform:translateY(-1px)}.b.o{background:var(--or)}.b.g{background:#16a34a}.b.r{background:#b91c1c}.b.x{background:#26324f}
+.lnk{color:#7db2ff;cursor:pointer;text-decoration:underline;background:none;border:0;font:inherit;padding:0}
+.chip{padding:2px 8px;border-radius:99px;font-size:11.5px;font-weight:600;display:inline-block}.cA{background:#16a34a33;color:#6ee7a0}.cB{background:#2f7bff33;color:#8fb8ff}.cC{background:#facc1533;color:#fde68a}.cD{background:#ef444433;color:#fca5a5}
+.yes{color:#fff;font-weight:900;background:#000;padding:1px 8px;border-radius:6px;border:1px solid #444}.no{color:var(--rd);font-weight:700}
+input,select,textarea{background:#0f1830;border:1px solid var(--bd);color:var(--tx);border-radius:8px;padding:7px 9px;font:inherit}textarea{width:100%;min-height:150px}
+.bar{height:8px;border-radius:9px;background:#22304f;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--or),#ffd166);animation:gw 1.2s}@keyframes gw{from{width:0}}
+.flt{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+#modal{position:fixed;inset:0;background:#000a;z-index:20;display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:24px}
+#modal>div{background:#0f172b;border:1px solid var(--or);border-radius:16px;max-width:1000px;width:100%;padding:18px;animation:fi .3s}
+#toasts{position:fixed;top:70px;right:16px;z-index:50;display:flex;flex-direction:column;gap:8px}.t{padding:11px 16px;border-radius:10px;font-weight:600;animation:fi .3s;box-shadow:0 6px 20px #0008}.t.ok{background:#14532d;border:1px solid var(--gr)}.t.bad{background:#7f1d1d;border:1px solid var(--rd)}
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh}#login .card{width:360px;text-align:center}#login input{width:100%;margin:5px 0}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;margin:12px 0}.kv div{background:#18233e;border-radius:9px;padding:8px}.kv small{color:var(--mu);display:block}
+h2{margin:0 0 12px}.mu{color:var(--mu)}@media(max-width:800px){nav{width:62px}nav button span{display:none}}
+.mq{overflow:hidden;white-space:nowrap;background:linear-gradient(90deg,#ff6a13,#ffb347);color:#1a0f00;font-weight:700;border-radius:10px;padding:6px 0;margin-bottom:12px}.mq span{display:inline-block;padding-left:100%;animation:mq 22s linear infinite}@keyframes mq{to{transform:translateX(-100%)}}
+body.guard,body.guard *{-webkit-user-select:none;user-select:none}body.guard input,body.guard textarea{-webkit-user-select:text;user-select:text}
+@media print{body.guard *{display:none!important}}#app.blurred{filter:blur(22px)}#wm{position:fixed;inset:0;z-index:40;pointer-events:none}
+#alarm{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(120,0,0,.88);animation:alr .5s infinite alternate}@keyframes alr{from{background:rgba(120,0,0,.9)}to{background:rgba(255,0,0,.72)}}
+.al-b{background:#1a0000;border:4px solid #ff2b2b;border-radius:20px;padding:28px 38px;text-align:center;max-width:92vw;box-shadow:0 0 70px #f00;animation:shk .3s infinite;color:#fff}.al-b h1{color:#ff5a5a;margin:6px 0;font-size:26px}@keyframes shk{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.sortbar{margin:4px 0}.sortbar select{max-width:200px}
+.om{background:linear-gradient(90deg,#7f1d1d,#b45309);border:2px solid #fbbf24;border-radius:12px;padding:10px 14px;margin-bottom:12px;animation:omp 2s infinite alternate;color:#fff}@keyframes omp{to{box-shadow:0 0 18px #fbbf24aa}}
+.wx{background:#131c31cc;border:1px solid var(--bd);border-radius:12px;padding:8px 14px;margin-bottom:12px;font-size:13px}
+
+/* ===== V8 GLOBAL DATE FILTER ===== */
+.datebar{display:flex;gap:9px;align-items:end;flex-wrap:wrap;padding:13px;margin:0 0 14px;background:#131c31;border:1px solid #25334f;border-radius:13px}.datebar label{display:flex;flex-direction:column;gap:5px;color:#aab9d2;font-size:12px;font-weight:700}.datebar input{background:#0b1220;color:#e8eef9;border:1px solid #344563;border-radius:8px;padding:9px 10px;min-height:40px;color-scheme:dark}.datebar button{min-height:38px}.datebar .period-title{font-weight:800;color:#ff9a54;margin-right:auto;align-self:center}.datebar .hint{width:100%;font-size:11px;color:#8fa0bf}
+/* V8.2 login loading */
+.login-spinner{display:inline-block;width:17px;height:17px;border:2px solid #ffffff66;border-top-color:#fff;border-radius:50%;vertical-align:-4px;margin-right:9px;animation:loginSpin .7s linear infinite}
+@keyframes loginSpin{to{transform:rotate(360deg)}}
+#login .b:disabled{opacity:.72;cursor:wait;filter:none;transform:none}
+.logo small:last-child{letter-spacing:.15px}
+#login .card{max-width:94vw}
+ .reminder{padding:12px 16px;border-radius:12px;margin:10px 0;font-weight:700;border:1px solid #33415f}.reminder.good{background:#123a2c;color:#a7f3d0;border-color:#166534}.reminder.warn{background:#3b2630;color:#fecdd3;border-color:#9f1239}.reminder.login-gap{background:#1c2944;color:#cbd5e1;font-weight:600} </style></head><body>
+<canvas id="fx"></canvas><div id="toasts"></div><div id="modal" onclick="if(event.target==this)closeM()"><div id="mb"></div></div>
+<div id="login"><div style="margin:auto;padding:40px;text-align:center;color:#8fa0bf">⏳ Memuat dashboard Mitra10 Bitung Cikupa…</div></div><div id="app" style="display:none"></div>
+<div id="err" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99;background:#7f1d1d;color:#fff;padding:10px 16px;font:13px system-ui"></div>
+<script>onerror=function(m){var e=document.getElementById("err");e.style.display="block";e.textContent="Terjadi kesalahan: "+m+" — coba muat ulang (Ctrl+F5) atau buka dengan Chrome/Edge."}</script>
+<script id="dj" type="text/plain">H4sIALqCBmsC/4VSwU6EMBD9lYaDJw/sajxwK1CXxtKSAuGw2QOuNWqWhUCN0c3+u52WXTGyMeHw5r2hM+9lDl49tM9egJb+8s5f+Itr5G1rPRhm7d0zISTlK4R5jCrMmGfUEBeJFCIFnLEyDU2D5UvKYmhOcUEkxbY5Ng/k7nfKY1HlQCZYxhWWBHAhBHOkKHMCLLpCiQhDSiyd0jwijGFOjA4EzjJGMY+c/ECLKCEcIGEkKiSNMLPzGF0lxbhahikvLJuXPJbw9MbQX+1eGZ+HGZ8BWkytmnimbl3513CAbmY9O/5s25XO+SjNmHfKb/+Om0QQoNtJCq66FIRTZ7IwwtEoQwdhWKTbHpLxDW7aPdyCgf98kOhT/br7hPb1zzn5G1CGfmujzuudGlDWt29qqy2jWz2OGheADaoXc4O46y50uHX1ad9GNY+qtzcLs/bq4wRbfWZV02nYTffv6vgNnZRiEfcCAAA=</script>
+
+<script>
+/* ===== KONFIGURASI SUPABASE (isi setelah menjalankan supabase_setup.sql) ===== */
+const SB_URL='https://hvdhzqirqmuhwzuikezw.supabase.co',SB_KEY='sb_publishable_VhNXgBLDo30vMB2IBSb4Gg_QJG_OVhD';
+/* ================================================================================ */
+let D=null;async function loadEmb(){const s=atob(document.getElementById('dj').textContent.trim()),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return JSON.parse(await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text())}
+let REC=/type=recovery/.test(location.hash);const demo=false,sb=(SB_URL&&SB_KEY)?supabase.createClient(SB_URL,SB_KEY):null;
+if(sb&&sb.auth&&sb.auth.onAuthStateChange)sb.auth.onAuthStateChange(ev=>{if(ev==='PASSWORD_RECOVERY'){REC=true;if(typeof showReset==='function')showReset()}});
+let MODE='sb',CLD=null,CLA=null,CLU=null;
+async function detectCL(){try{if(!(window.claude&&claude.use))return;const db=await Promise.race([claude.use('db'),new Promise(r=>setTimeout(()=>r(null),6000))]);if(!db)return;CLD=db;CLU=await claude.use('user');CLA=await claude.use('assets');MODE='cl'}catch(e){}}
+async function gzB64(o){const u=new Uint8Array(await new Response(new Blob([JSON.stringify(o)]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());let b='';for(let i=0;i<u.length;i+=8192)b+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(b)}
+async function ungzB64(t){const s=atob(t),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return JSON.parse(await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text())}
+const CLB={async col(n){try{return(await CLD.collection(n).get()).docs.map(d=>d.data())}catch(e){return[]}},
+ async load(){const[f,st,a]=await Promise.all([this.col('followups'),this.col('settings'),this.col('activity')]);S.fu={};f.filter(r=>r.month===MK).forEach(r=>S.fu[r.member_no]=r);S.fuHistory=f;const o={};st.forEach(r=>o[r.key]=r.value);
+  S.script=o.wa_script||DEF_SCRIPT;S.up=o.last_upload||null;S.maintenance=o.maintenance||null;S.dsid=o.dataset?o.dataset.id:null;S.dsu=o.dataset?o.dataset.url:null;S.act=a.sort((x,y)=>y.at>x.at?1:-1).slice(0,300);S.users=[]},
+ async setting(k,v){await CLD.doc('settings/'+k).set({key:k,value:v})},
+ async log(r){try{await CLD.doc('activity/'+Date.now()+'-'+Math.random().toString(36).slice(2,7)).set(r)}catch(e){}},
+ async saveData(j){if(!CLA)throw 0;const r=await CLA.upload(new Blob([JSON.stringify(j)],{type:'application/json'}));await this.setting('dataset',{id:r.id,url:r.url,at:new Date().toISOString()});S.curds=r.id},
+ async loadData(){try{await this.load();if(!S.dsu)return null;const j=await (await fetch(S.dsu)).json();S.curds=S.dsid;return j}catch(e){return null}},
+ sub(){if(MODE=='cl')return CLB.sub();let t;const rf=()=>{clearTimeout(t);t=setTimeout(async()=>{await CLB.load();if(S.maintenance&&S.maintenance.active&&!isOw()){S.user=null;return showMaintenance()}if(!S.maintenance?.active&&!S.user&&$('login')?.innerText.includes('Sistem Terkunci'))return showLogin('Sistem sudah dibuka kembali oleh Owner. Silakan login.');if(S.dsid&&S.dsid!==S.curds){const j=await CLB.loadData();if(j){D=j;BASE_D=JSON.parse(JSON.stringify(j));prep() }}render(true)},500)};['followups','settings','activity'].forEach(n=>CLD.collection(n).onSnapshot(rf,()=>{}))}};
+const LS={g:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const bc=window.BroadcastChannel?new BroadcastChannel('m10'):null;
+const S={user:null,view:'home',fu:{},script:'',act:[],users:[],up:null,maintenance:null,fuHistory:[],pg:0,f:{q:'',cl:'',fu:'',bp:'',pic:'',z:'',t:''}};
+let BASE_D=null, PERIOD={start:'',end:''};
+const ymdInput=n=>{const x=String(n||'');return x.length===8?x.slice(0,4)+'-'+x.slice(4,6)+'-'+x.slice(6,8):''};
+const inputYmd=x=>x?+x.slice(0,4)*10000+ +x.slice(5,7)*100+ +x.slice(8,10):0;
+function initPeriod(){if(!BASE_D||!BASE_D.daily||!BASE_D.daily.length)return;const a=BASE_D.daily.map(x=>x[0]).sort((x,y)=>x-y);if(!PERIOD.start)PERIOD.start=ymdInput(a[0]);if(!PERIOD.end)PERIOD.end=ymdInput(BASE_D.asof||a[a.length-1]);}
+function makePeriodData(){if(!BASE_D)return D;initPeriod();const a=inputYmd(PERIOD.start),b=inputYmd(PERIOD.end);if(!a||!b||a>b)return BASE_D;const x=JSON.parse(JSON.stringify(BASE_D));x.daily=BASE_D.daily.filter(r=>r[0]>=a&&r[0]<=b);x.mon=Array(12).fill(0);x.daily.forEach(r=>x.mon[Math.floor(r[0]/100)%100-1]+=r[1]);x.store=x.daily.reduce((t,r)=>t+r[1],0);x.members=BASE_D.members.map(m=>{const tx=(m.tx||[]).filter(r=>r[0]>=a&&r[0]<=b);if(!tx.length)return null;const mm=Array(12).fill(0),vv=Array(12).fill(0);tx.forEach(r=>{const mo=Math.floor(r[0]/100)%100-1;mm[mo]+=r[1];vv[mo]++});const items=(m.it||[]).filter(r=>!r[3]||(r[3]>=a&&r[3]<=b));return {...m,tx,y:tx.reduce((t,r)=>t+r[1],0),tc:tx.length,m:mm,v:vv,it:items};}).filter(Boolean);x.asof=b;return x;}
+function choosePeriod(kind){if(!isEd())return deny('Ubah periode dashboard',1);const now=new Date(),fmt=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),end=new Date(now.getFullYear(),now.getMonth(),now.getDate()),start=new Date(end);if(kind==='today'){}else if(kind==='yesterday'){start.setDate(start.getDate()-1);end.setDate(end.getDate()-1)}else if(kind==='7d')start.setDate(start.getDate()-6);else if(kind==='month')start.setDate(1);else if(kind==='lastmonth'){start.setMonth(start.getMonth()-1,1);end.setDate(0)}else if(kind==='year'){start.setMonth(0,1)}PERIOD={start:fmt(start),end:fmt(end)};render();}
+function applyPeriod(){if(!isEd())return deny('Ubah periode dashboard',1);const a=$('periodStart').value,b=$('periodEnd').value;if(!a||!b||a>b)return toast('Periksa tanggal mulai dan tanggal akhir','bad');PERIOD={start:a,end:b};render();toast('Dashboard diperbarui sesuai periode '+a+' s/d '+b);}
+function dateBar(){initPeriod();const canEdit=!!isEd();return `<section class="datebar"><div class="period-title">📅 FILTER PERIODE DASHBOARD</div><label>Dari tanggal<input id="periodStart" type="date" value="${PERIOD.start}" ${canEdit?'':'disabled'} onchange="if(isEd())PERIOD.start=this.value"></label><label>Sampai tanggal<input id="periodEnd" type="date" value="${PERIOD.end}" ${canEdit?'':'disabled'} onchange="if(isEd())PERIOD.end=this.value"></label><button class="b o" ${canEdit?'':'disabled'} onclick="applyPeriod()">Terapkan</button><div class="hint">Semua grafik, KPI penjualan, daftar member dan export mengikuti tanggal yang dipilih. ${canEdit?'Pilih tanggal melalui kalender, lalu klik Terapkan.':'Filter tanggal hanya dapat diubah oleh Owner/Editor.'}</div></section>`}
+const $=id=>document.getElementById(id);const MON=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const rp=n=>'Rp '+Math.round(n||0).toLocaleString('id-ID');const rpc=n=>n>=1e9?(n/1e9).toFixed(2)+' M':n>=1e6?(n/1e6).toFixed(1)+' jt':Math.round(n).toLocaleString('id-ID');
+const fd=y=>{y=String(y);return y.length<8?'-':y.slice(6)+'/'+y.slice(4,6)+'/'+y.slice(0,4)};
+const isoY=d=>d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+const jakartaYmd=()=>{const p=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const v={};p.forEach(x=>v[x.type]=x.value);return Number(v.year+v.month+v.day)};
+const TODAY=jakartaYmd();const MK=String(TODAY).slice(0,6);
+const addD=(y,n)=>{y=String(y);const d=new Date(+y.slice(0,4),+y.slice(4,6)-1,+y.slice(6,8)+n);return isoY(d)};
+const diffD=(a,b)=>{const p=s=>{s=String(s);return new Date(+s.slice(0,4),+s.slice(4,6)-1,+s.slice(6,8))};return Math.round((p(b)-p(a))/864e5)};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const isEd=()=>S.user&&(S.user.role==='owner'||S.user.role==='editor');const isOw=()=>S.user&&S.user.role==='owner';
+const DEF_SCRIPT='Halo Bapak/Ibu {nama} 🙏\nTerima kasih sudah berbelanja di Mitra10 Bitung Cikupa. Saya {sales}, ingin memastikan barang yang Bapak/Ibu beli ({item}) sudah diterima dengan baik dan sesuai kebutuhan.\nJika ada kendala atau butuh material lainnya, kami siap membantu. Salam hangat, Mitra10 Bitung Cikupa.';
+let charts=[];const mk=(id,cfg)=>{const c=$(id);if(!c)return;if(typeof Chart==='undefined'){c.parentNode.innerHTML='<p class="mu">Grafik tidak termuat (butuh internet untuk Chart.js).</p>';return}cfg.options=Object.assign({responsive:true,maintainAspectRatio:false,animation:{duration:1200},plugins:{legend:{labels:{color:'#cfe0ff'}}}},cfg.options||{});if(cfg.type!='doughnut'&&cfg.type!='pie'){cfg.options.scales=Object.assign({x:{ticks:{color:'#8fa0bf'},grid:{color:'#1f2c47'}},y:{ticks:{color:'#8fa0bf'},grid:{color:'#1f2c47'}}},cfg.options.scales||{})}charts.push(new Chart(c,cfg))};
+const PAL=['#ff6a13','#2f7bff','#22c55e','#facc15','#a855f7','#06b6d4','#ef4444','#f472b6'];
+/* ---------- efek hidup ---------- */
+(()=>{const c=$('fx'),x=c.getContext('2d');let P=[];const rs=()=>{c.width=innerWidth;c.height=innerHeight;P=Array.from({length:55},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*2+.5,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4}))};rs();onresize=rs;
+(function f(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.x=(p.x+p.vx+c.width)%c.width;p.y=(p.y+p.vy+c.height)%c.height;x.fillStyle='#ff6a1366';x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fill()});requestAnimationFrame(f)})()})();
+const countUp=()=>document.querySelectorAll('[data-n]').forEach(e=>{const t=+e.dataset.n,f=e.dataset.f||'n',s=performance.now();(function st(n){const k=Math.min(1,(n-s)/900),v=t*k;e.textContent=f=='rp'?'Rp '+rpc(v):f=='p'?v.toFixed(1)+'%':Math.round(v).toLocaleString('id-ID');if(k<1)requestAnimationFrame(st)})(s)});
+const toast=(m,t='ok',em)=>{const e=document.createElement('div');e.className='t '+t;e.textContent=(em!==undefined?em:(t=='ok'?'👍 ':'❌ '))+m;$('toasts').appendChild(e);setTimeout(()=>e.remove(),4500)};
+const logoSvg=(s=44)=>`<svg width="${s}" height="${s}" viewBox="0 0 64 64"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8a3d"/><stop offset="1" stop-color="#e5410b"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#lg)"/><path d="M10 46V20l11 14 11-14v26M38 20h6v26h-6zM48 20h6v26h-6z" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/></svg>`;
+const brand=(s)=>`<div class="logo">${logoSvg(s)}<div><b>MITRA10</b><small>BITUNG CIKUPA</small><small style="color:#ff9a54;font-weight:700">presented by : Sahroji</small></div></div>`;
+/* ---------- backend (Supabase / demo) ---------- */
+async function fetchFULog(from,to){
+ let all=[],offset=0;
+ while(true){
+  const q=await sb.from('m10_fu_log').select('*').gte('at',from).lt('at',to).order('at',{ascending:false}).range(offset,offset+999);
+  if(q.error)throw q.error;
+  const rows=q.data||[];all.push(...rows);
+  if(rows.length<1000)break;
+  offset+=1000;
+ }
+ return all;
+}
+const BE={
+ async load(){ if(MODE=='cl')return CLB.load(); if(demo){S.fu=LS.g('fu_'+MK,{});S.fuHistory=Object.entries(LS.g('fu_'+MK,{})).map(([member_no,r])=>r);S.script=LS.g('script',DEF_SCRIPT);S.act=LS.g('act',[]);S.users=LS.g('users',[]);S.up=LS.g('up',null);S.maintenance=LS.g('maintenance',null);return}
+  const yr=new Date().getFullYear(),yearEnd=(yr+1)+'-01-01T00:00:00',prevStart=(yr-1)+'-01-01T00:00:00';
+  const [f,hist,s,a,u,fl,sys]=await Promise.all([
+   sb.from('m10_followups').select('*').eq('month',MK),
+   sb.from('m10_followups').select('*').gte('fu_at',prevStart).lt('fu_at',yearEnd),
+   sb.from('m10_settings').select('*'),
+   isEd()?sb.from('m10_activity').select('*').order('at',{ascending:false}).limit(300):Promise.resolve({data:[]}),
+   isEd()?sb.from('m10_profiles').select('*'):Promise.resolve({data:[]}),
+   fetchFULog(prevStart,yearEnd),
+   sb.from('m10_system').select('maintenance,message,set_by,set_at').eq('id',1).maybeSingle()
+  ]);
+  for(const r of [f,hist,s,a,u,fl,sys])if(r&&r.error)throw r.error;
+  S.fu={};(f.data||[]).forEach(r=>S.fu[r.member_no]=r);
+  const fuLogs=(fl.data||[]).map(x=>({...x,fu_at:x.at,month:x.month||(String(x.fu_date||'').slice(0,7).replace('-','')),customer_name:x.customer_name||'',fu_by:x.fu_by||'',fu_email:x.fu_email||'',channel:x.channel||''}));
+  const eventMonths=new Set(fuLogs.filter(x=>x.member_no&&x.month).map(x=>x.member_no+'|'+x.month));
+  const legacyFU=(hist.data||[]).filter(x=>!eventMonths.has(x.member_no+'|'+String(x.month||String(x.fu_at||'').slice(0,7).replace('-','')))).map(x=>({...x,customer_name:'',channel:'legacy'}));
+  S.fuHistory=fuLogs.concat(legacyFU).sort((x,y)=>new Date(y.fu_at||y.at)-new Date(x.fu_at||x.at));
+  const st={};(s.data||[]).forEach(r=>st[r.key]=r.value);S.script=st.wa_script||DEF_SCRIPT;S.up=st.last_upload||null;S.promo=st.wa_promo||{};S.msg=st.owner_msg||null;
+  S.maintenance=sys.data&&sys.data.maintenance?{active:true,message:sys.data.message||'',by:sys.data.set_by||'',at:sys.data.set_at||null}:null;
+  S.act=a.data||[];S.users=u.data||[];await loadRR()},
+ async fuAdd(n,m,kind){const channel=kind==='business'?'wa_business':'wa_utama';let r;
+  if(MODE=='cl'){r={member_no:n,month:MK,fu_by:S.user.name,fu_email:S.user.email,fu_at:new Date().toISOString()};await CLD.doc('followups/'+MK+'_'+n).set(r)}
+  else if(demo){r={member_no:n,month:MK,fu_by:S.user.name,fu_email:S.user.email,fu_at:new Date().toISOString()};const f=LS.g('fu_'+MK,{});f[n]=r;LS.s('fu_'+MK,f)}
+  else {const q=await sb.rpc('m10_record_fu',{p_member:n,p_pic:m&&m.pic?String(m.pic):'',p_pic_name:m&&m.pn?String(m.pn):'',p_cust:m&&m.nm?String(m.nm):'',p_channel:channel});if(q.error)throw q.error;const out=q.data||{};if(out.recorded===false)return out;r={member_no:n,month:MK,fu_by:S.user.name,fu_email:S.user.email,fu_at:out.at||new Date().toISOString(),fu_sales_id:S.user.sales_id||'',pic_id:m&&m.pic||'',pic_name:m&&m.pn||'',customer_name:m&&m.nm||'',channel,mismatch:!!out.mismatch}}
+  S.fu[n]=r;S.fuHistory=S.fuHistory||[];S.fuHistory.push(r);this.ping();return {recorded:true,...r}},
+ async log(action,detail){const r={at:new Date().toISOString(),email:S.user.email,name:S.user.name,action,detail:detail||''};
+  if(MODE=='cl')await CLB.log(r);else if(demo){const a=LS.g('act',[]);a.unshift(r);LS.s('act',a.slice(0,300))}else {const q=await sb.from('m10_activity').insert(r);if(q.error)throw q.error}this.ping()},
+ async setting(k,v){if(MODE=='cl')await CLB.setting(k,v);else if(demo)LS.s(k=='wa_script'?'script':k=='maintenance'?'maintenance':'up',v);else {const r=await sb.from('m10_settings').upsert({key:k,value:v});if(r.error)throw r.error}this.ping()},
+ async setUser(id,p){if(demo){const u=LS.g('users',[]);const x=u.find(z=>z.id==id);if(x)Object.assign(x,p);LS.s('users',u)}else{const r=await sb.from('m10_profiles').update(p).eq('id',id);if(r.error)throw r.error}this.ping()},
+ async saveData(j){if(MODE=='cl')return CLB.saveData(j);if(!demo){const r=await sb.from('m10_datasets').insert({payload_gz:await gzB64(j),uploaded_by:S.user.email});if(r.error)throw r.error}},
+ async loadData(){if(MODE=='cl')return CLB.loadData();if(demo)return null;try{const r=await sb.from('m10_datasets').select('payload_gz').order('id',{ascending:false}).limit(1);return r.data&&r.data[0]?await ungzB64(r.data[0].payload_gz):null}catch(e){return null}},
+ ping(){bc&&bc.postMessage(1)},
+ sub(){let t;const rf=()=>{clearTimeout(t);t=setTimeout(async()=>{const n0=cntBad(),r0=rrPend();await BE.load();if(S.maintenance&&S.maintenance.active&&!isOw()){S.user=null;return showMaintenance()}if(!S.maintenance?.active&&!S.user&&$('login')?.innerText.includes('Sistem Terkunci'))return showLogin('Sistem sudah dibuka kembali oleh Owner. Silakan login.');if(isOw()&&cntBad()>n0)ownerAlert();if(isEd()&&rrPend()>r0)rrAlert();render(true)},400)};if(bc)bc.onmessage=rf;addEventListener('storage',rf);
+  if(!demo)sb.channel('m10').on('postgres_changes',{event:'*',schema:'public'},async p=>{if(p.table=='m10_profiles'&&p.eventType==='DELETE'&&p.old&&p.old.id===S.uid){kickOut('deleted');return}if(p.table=='m10_profiles'&&p.new&&p.new.id===S.uid&&p.new.status!=='approved'){kickOut(p.new.status);return}if(p.table=='m10_profiles'&&p.new&&p.new.id===S.uid&&p.new.role&&S.user&&p.new.role!==S.user.role){S.user.role=p.new.role;toast('Peran Anda sekarang: '+p.new.role+'. Muat ulang halaman untuk memperbarui menu.','ok','🔔 ');render(true)}if(p.table=='m10_settings'&&p.new&&p.new.key=='last_upload'){const j=await BE.loadData();if(j){D=j;BASE_D=JSON.parse(JSON.stringify(j));prep() }}rf()}).subscribe()}
+};
+/* ---------- login ---------- */
+function showLogin(msg){$('app').style.display='none';$('login').style.display='flex';let m=1;
+ $('login').innerHTML=`<div class="card">${brand(70)}<h2 style="margin-top:14px">Kontrol Member <small class="mu" style="font-weight:400">v9.0</small></h2><p class="mu">Login dengan email yang sudah didaftarkan</p>
+ <input id="le" type="email" placeholder="Email"><input id="lp" type="password" placeholder="Password"><input id="ln" placeholder="Nama Sales (khusus daftar baru)">
+ <p style="color:#fca5a5;min-height:18px" id="lm">${msg||''}</p><button id="loginBtn" class="b o" style="width:100%;padding:10px" onclick="doLogin(0)">Masuk</button>
+ <button id="registerBtn" class="b x" style="width:100%;margin-top:6px" onclick="doLogin(1)">Daftar (menunggu persetujuan Owner/Editor)</button>
+ <button class="lnk" style="margin-top:12px" onclick="showForgot()">🔑 Lupa password?</button>
+ ${demo?'<small class="mu">Mode demo (Supabase belum diisi)</small>':''}</div>`}
+function demoIn(r){enter({email:r+'@demo.local',name:r=='owner'?'Owner':'Sales Demo',role:r})}
+function setLoginLoading(on,label){
+ const b=$('loginBtn'),r=$('registerBtn'),m=$('lm');
+ if(b){b.disabled=!!on;b.innerHTML=on?`<span class="login-spinner" aria-hidden="true"></span>${label||'Sedang memproses login…'}`:'Masuk'}
+ if(r)r.disabled=!!on;
+ if(m&&on)m.textContent='';
+}
+async function doLogin(reg){
+ const e=$('le').value.trim(),p=$('lp').value;
+ if(!e||!p)return $('lm').textContent='Isi email dan password';
+ setLoginLoading(true,reg?'Memproses pendaftaran…':'Memverifikasi akun…');
+ try{
+  if(demo){
+   const U={'4afaca80adfe00e096efcbf8fa9cc4022dc8e0c9b4876be16d83d5df9fe577f4':{email:'ojievandermord@gmail.com',name:'Owner',role:'owner'},'ccd85b83db6c6f4b8dece1c2b48ea4005e0a3bf4f57011385f54d10f4bcb2feb':{email:'Bitungcikupa@gmail.com',name:'Sales Bitung Cikupa',role:'member'}};
+   const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(e.toLowerCase()+':'+p));
+   const k=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+   if(reg){$('lm').textContent='Pendaftaran akun baru butuh Supabase (mode demo hanya 2 akun)';return}
+   if(U[k]){await enter(U[k]);return}
+   $('lm').textContent='Email atau password salah';return;
+  }
+  if(reg){
+   const r=await sb.auth.signUp({email:e,password:p,options:{data:{name:$('ln').value||e}}});
+   $('lm').textContent=r.error?r.error.message:'Terdaftar. Tunggu persetujuan Owner/Editor.';return;
+  }
+  const r=await sb.auth.signInWithPassword({email:e,password:p});
+  if(r.error){const em=r.error.message||'';$('lm').textContent=/fetch|network/i.test(em)?'Tidak bisa terhubung ke server Supabase. Buka lewat link GitHub Pages/Netlify (bukan di claude.ai atau file lokal) dan cek internet.':/not confirmed/i.test(em)?'Email belum dikonfirmasi: matikan Confirm email di Supabase atau klik link di email.':'Email/password salah, atau akun belum didaftarkan (klik Daftar dulu).';return}
+  $('loginBtn').innerHTML='<span class="login-spinner" aria-hidden="true"></span>Login berhasil, memuat dashboard…';
+  await boot();
+ }catch(x){console.error('Login error:',x);const m=$('lm');if(m)m.textContent='Login gagal diproses. Periksa koneksi internet lalu coba kembali.';}
+ finally{if($('login')&&$('login').style.display!=='none')setLoginLoading(false);}
+}
+async function boot(){if(MODE=='cl'){const me=await CLU.me();return enter({email:me.email||me.id||'-',name:me.name||'Pengguna',role:me.isOwner?'owner':me.canEdit?'editor':'member'})}if(demo)return showLogin();if(REC)return showReset();const {data}=await sb.auth.getSession();if(!data.session)return showLogin();S.uid=data.session.user.id;
+ const pr=await sb.from('m10_profiles').select('*').eq('id',data.session.user.id).single();const p=pr.data;
+ if(!p||p.status!='approved'){await sb.auth.signOut();return showLogin(p&&p.status=='blocked'?'Akun diblokir.':'Akun belum disetujui Owner/Editor.')}
+ enter({email:p.email,name:p.name||p.email,role:p.role})}  /* sesi tersimpan => Owner & user disetujui langsung masuk tanpa login ulang */
+async function unlockEmb(){console.warn('Dataset utama tidak ditemukan di Supabase. Dashboard tidak menggunakan salinan data lokal.');return false}
+function showMaintenance(){$('app').style.display='none';$('login').style.display='flex';$('login').innerHTML=`<div class="card" style="max-width:430px;padding:28px">${brand(70)}<h2 style="margin-top:18px;color:#fbbf24">🔒 Sistem Terkunci</h2><p style="font-size:16px;font-weight:700">Sistem sedang dalam pemeliharaan oleh Owner.</p><p class="mu">Silakan kembali beberapa saat lagi. Akses dashboard sementara dinonaktifkan.</p><small class="mu">presented by : Sahroji</small></div>`}
+async function toggleMaintenance(){if(!isOw())return deny('Kunci sistem',1);const active=!(S.maintenance&&S.maintenance.active);if(!confirm(active?'Kunci dashboard untuk semua user selain Owner?':'Buka kembali akses dashboard untuk semua user?'))return;try{const r=await sb.rpc('m10_set_maintenance',{p_active:active,p_message:active?'Sistem sedang dalam pemeliharaan oleh Owner.':null});if(r.error)throw r.error;await BE.load();toast(active?'Dashboard dikunci untuk semua user.':'Dashboard dibuka kembali.');render(true)}catch(e){toast('Gagal mengubah status kunci: '+(e.message||e),'bad')}}
+async function enter(u){if(u.role==='owner')u.name='Sahroji';S.user=u;await BE.load();const prev=(S.act||[]).filter(a=>a.email===u.email&&String(a.action||'').toUpperCase()==='LOGIN').sort((a,b)=>new Date(b.at)-new Date(a.at))[0];S.loginGap=prev?Math.max(0,Date.now()-new Date(prev.at).getTime()):0;if(S.maintenance&&S.maintenance.active&&!isOw()){S.user=null;return showMaintenance()}let j=null;if(MODE==='sb'){j=await BE.loadData();if(j)D=j;else if(D.empty)await unlockEmb()}else{j=await BE.loadData();if(j)D=j}prep();BASE_D=D?JSON.parse(JSON.stringify(D)):null;initPeriod();BE.sub();$('login').style.display='none';$('app').style.display='block';
+ $('app').innerHTML=`<header>${brand(40)}<div style="font-weight:700;font-size:16px"><span class="live"></span>Welcome, ${esc(u.name)} - ${u.role==='owner'?'Owner':u.role==='editor'?'Editor':'Member'} <small class="mu" style="font-weight:400">v9.0</small></div><div class="upd" id="upd"></div>
+ <div class="mu" style="font-size:12px">${u.role[0].toUpperCase()+u.role.slice(1)} ${isOw()?`<button class="b ${S.maintenance&&S.maintenance.active?'g':'r'}" onclick="toggleMaintenance()">${S.maintenance&&S.maintenance.active?'🔓 Buka Sistem':'🔒 Kunci Sistem'}</button>`:''} ${MODE=='cl'?'':'<button class="b x" onclick="logout()">Keluar</button>'}</div></header>
+ <div class="wrap"><nav id="nav"></nav><main id="main"></main></div>`;BE.log('LOGIN');guardInit();startPresence();render()}
+async function logout(){if(!demo)await sb.auth.signOut();location.reload()}
+/* ---------- pengolah Excel -> data (port dari build_data.py) ---------- */
+function buildData(SR,MR,BR,OR){
+ const ZONE={'FLOORING AND WALL':1,'BATHROOM':2,'PLUMBING':2,'BUILDING MATERIAL':3,'DOORS AND WINDOWS':3,'HARDWARE':3,'TOOLS':3,'HOUSEWARE & HOBBIES':3,'MISCELLANEOUS':3,'APPLIANCES':4,'KITCHEN':4,'ELECTRICAL AND LIGHTING':4,'PAINT AND SUNDRIES':4},CATS=Object.keys(ZONE);
+ const ymdOf=v=>{if(typeof v==='number'){const d=new Date(Math.round((v-25569)*864e5));return d.getUTCFullYear()*10000+(d.getUTCMonth()+1)*100+d.getUTCDate()}if(v instanceof Date)return v.getFullYear()*10000+(v.getMonth()+1)*100+v.getDate();const m=String(v||'').match(/(\d{4})-(\d\d)-(\d\d)/);return m?+m[1]*10000+ +m[2]*100+ +m[3]:0};
+ const ns=v=>{if(v==null||v===''||v===0||v==='0')return'';return typeof v==='number'?String(Math.round(v)):String(v).trim()};
+ const rows=[];const sp={};let store=0;
+ for(const r of SR){if(typeof r[0]!=='number'||r[0]<40000)continue;const ymd=ymdOf(r[0]);const spid=r[20]==null?'':String(r[20]);
+  const o={ymd,mo:Math.floor(ymd/100)%100-1,mem:ns(r[3]),rcpt:String(r[5]),iname:String(r[7]),qty:+r[8]||0,exc:+r[10]||0,cat:r[11],src:r[17],spid};
+  if(spid&&r[21]&&!sp[spid])sp[spid]=String(r[21]).trim();rows.push(o);store+=o.exc}
+ const mmap={};for(let i=6;i<MR.length;i++){const r=MR[i];const n=ns(r[0]);if(!n||n==='0'||n==='Member No')continue;mmap[n]=[String(r[1]||'').trim(),r[2]==null?'':String(r[2])]}
+ const bpm={};for(let i=1;i<BR.length;i++){const r=BR[i];if(!r[2])continue;bpm[ns(r[2])]={tier:r[5],com:+r[6]||0,val:+r[7]||0,wa:String(r[1]||''),nm:String(r[0]||'').trim()}}
+ const byM={};let dmTot=0;for(const o of rows){if(!o.mem)continue;(byM[o.mem]=byM[o.mem]||[]).push(o);dmTot+=o.exc}
+ const tots=Object.entries(byM).map(([n,g])=>[n,g.reduce((a,x)=>a+x.exc,0)]).sort((a,b)=>b[1]-a[1]);const cum={};let c=0;tots.forEach(([n,v])=>{c+=v;cum[n]=c/dmTot});
+ const mems=[];
+ for(const [no,g] of Object.entries(byM)){const rc={},m=Array(12).fill(0),c13=Array(13).fill(0),it={},ps={};
+  for(const o of g){const r=rc[o.rcpt]=rc[o.rcpt]||{ymd:o.ymd,v:0,mo:o.mo};r.v+=o.exc;m[o.mo]+=o.exc;const ci=CATS.indexOf(o.cat);if(ci>=0)c13[ci]+=o.exc;
+   const t=it[o.iname]=it[o.iname]||{q:0,v:0,l:0};t.q+=o.qty;t.v+=o.exc;t.l=Math.max(t.l,o.ymd);ps[o.spid]=(ps[o.spid]||0)+o.exc}
+  const rcs=Object.values(rc),v=Array(12).fill(0);rcs.forEach(r=>v[r.mo]++);
+  const pic=Object.entries(ps).sort((a,b)=>b[1]-a[1])[0][0],y=g.reduce((a,x)=>a+x.exc,0);let cl=cum[no]<=.8?'A':cum[no]<=.95?'B':'C';if(rcs.length==1&&cl!='A')cl='D';
+  const mm=mmap[no]||[null,''],b=bpm[no];let nm=mm[0]||(b&&b.nm)||'Member '+no.slice(-6),phn=mm[1]||(b?b.wa:'');
+  mems.push({n:no,nm,ph:phn,pic,y:Math.round(y),tc:rcs.length,m:m.map(Math.round),v,c:c13.map(Math.round),cl,z:ZONE[CATS[c13.indexOf(Math.max(...c13))]],bp:b?{tier:b.tier,com:b.com,val:b.val}:0,
+   it:Object.entries(it).sort((a,b)=>b[1].v-a[1].v).slice(0,6).map(([k,r])=>[k.slice(0,60),Math.round(r.q),Math.round(r.v),r.l]),tx:rcs.sort((a,b)=>a.ymd-b.ymd).map(r=>[r.ymd,Math.round(r.v)])})}
+ const done=new Set(mems.map(x=>x.n)),nw=Object.entries(mmap).filter(([n])=>!done.has(n)).map(([n,a])=>[n,a[0],a[1]]);
+ const mon=Array(12).fill(0),dl={};rows.forEach(o=>{mon[o.mo]+=o.exc;dl[o.ymd]=(dl[o.ymd]||0)+o.exc});
+ const src={};for(const s of['Sales Project','WhatsApp']){const x=rows.filter(o=>o.src===s),by={};x.forEach(o=>(by[o.spid]=by[o.spid]||[]).push(o));const r={};
+  for(const [k,g] of Object.entries(by)){const cu={},rs=new Set(),m=Array(12).fill(0);g.forEach(o=>{cu[o.mem]=(cu[o.mem]||0)+o.exc;rs.add(o.rcpt);m[o.mo]+=o.exc});
+   r[k]={v:Math.round(g.reduce((a,o)=>a+o.exc,0)),r:rs.size,m:m.map(Math.round),top:Object.entries(cu).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([a,b])=>[(mmap[a]&&mmap[a][0])||a.slice(-6)||'Non member',Math.round(b)])}}
+  src[s]={tot:Math.round(x.reduce((a,o)=>a+o.exc,0)),sp:r}}
+ const rc2m={};rows.forEach(o=>{if(!(o.rcpt in rc2m))rc2m[o.rcpt]=o.mem});
+ let hi=OR.findIndex(r=>String(r[0]||'').trim().startsWith('Store No'));const H={};OR[hi].forEach((h,i)=>{if(h!=null)H[String(h).trim()]=i});const ots=[];
+ for(let i=hi+1;i<OR.length;i++){const r=OR[i];if(!r[H['NP No']])continue;const q=+r[H['Outstanding Quantity']];if(!(q>0))continue;const pd=ymdOf(r[H['Promised Delievery Date']]);
+  ots.push([r[H['NP No']],String(ymdOf(r[H['Order Date']])),r[H['Sales person Code']],r[H['Type']],r[H['Status']],String(r[H['Customer Name']]||'').trim(),rc2m[String(r[H['Receipt No']])]||'',String(r[H['Description']]||'').trim(),Math.round(q),Math.round(+r[H['Total Value Amount']]||0),pd?String(pd):''])}
+ const ymds=Object.keys(dl).map(Number);
+ return{asof:Math.max(...ymds),cats:CATS,zone:ZONE,sp,store:Math.round(store),mon:mon.map(Math.round),daily:Object.entries(dl).map(([k,v])=>[+k,Math.round(v)]).sort((a,b)=>a[0]-b[0]),src,spt:{},members:mems,new:nw,ots}}
+
+/* ---------- olah data ---------- */
+let MM={},OTSM={},PICS={};
+function prep(){MM={};OTSM={};D.members.forEach(m=>{MM[m.n]=m;m.pn=D.sp[m.pic]||m.pic||'-';m.o=[]});
+ D.ots.forEach(r=>{const o={np:r[0],od:r[1],sp:r[2],ty:r[3],st:r[4],cu:r[5],mn:r[6],it:r[7],q:r[8],v:r[9],pdd:r[10],pn:D.sp[r[2]]||r[2]};if(MM[o.mn])MM[o.mn].o.push(o);(OTSM[o.np]=OTSM[o.np]||[]).push(o)});
+ PICS={};D.members.forEach(m=>{(PICS[m.pic]=PICS[m.pic]||{id:m.pic,n:m.pn,ms:[]}).ms.push(m)})}
+const OTS=()=>D.ots.map(r=>({np:r[0],od:r[1],sp:r[2],ty:r[3],cu:r[5],mn:r[6],it:r[7],q:r[8],pdd:r[10],pn:D.sp[r[2]]||r[2]}));
+const fuOf=m=>S.fu[m.n];
+function ret(m){const f=fuOf(m);if(!f)return null;const fy=isoY(new Date(f.fu_at));const t=m.tx.find(x=>x[0]>=fy&&x[0]<=addD(fy,7));if(!t)return null;return{d:t[0],days:diffD(fy,t[0]),v:m.tx.filter(x=>x[0]>=fy&&x[0]<=addD(fy,7)).reduce((a,x)=>a+x[1],0)}}
+const clChip=c=>`<span class="chip c${c}">Class ${c}</span>`;const bpTag=m=>m.bp?'<span class="yes">Yes</span>':'<span class="no">No</span>';
+function ph(p){p=String(p||'').replace(/\D/g,'');return p.startsWith('0')?'62'+p.slice(1):p}
+function wa(n,ev){ev&&ev.stopPropagation();const m=MM[n];if(!m||!m.ph)return;const phone=ph(m.ph),msg=encodeURIComponent(script(m));modal(`<h2>📲 Pilih WhatsApp</h2><p class="mu">Pilih aplikasi yang ingin digunakan untuk menghubungi <b>${esc(m.nm)}</b>.</p><div class="grid g2"><button class="b g" style="padding:16px;font-size:15px" onclick="launchWA('${n}','main')">🟢 WhatsApp Utama</button><button class="b o" style="padding:16px;font-size:15px" onclick="launchWA('${n}','business')">💼 WhatsApp Business</button></div><p class="mu" style="margin-top:12px;font-size:11px">Status FU akan tercatat saat Anda memilih aplikasi dan membuka tautan WhatsApp. Sistem tidak dapat memastikan pesan sudah benar-benar dikirim.</p>`)}
+async function launchWA(n,kind){const m=MM[n];if(!m||!m.ph)return;const phone=ph(m.ph),msg=encodeURIComponent(script(m));let url=kind==='business'?( /Android/i.test(navigator.userAgent)?`intent://send?phone=${phone}&text=${msg}#Intent;scheme=whatsapp;package=com.whatsapp.w4b;end`:/iPhone|iPad|iPod/i.test(navigator.userAgent)?`whatsapp-business://send?phone=${phone}&text=${msg}`:`https://web.whatsapp.com/send?phone=${phone}&text=${msg}`):`https://wa.me/${phone}?text=${msg}`;const w=window.open('about:blank','_blank');if(!w)return toast('Popup diblokir browser. Izinkan popup untuk dashboard ini.','bad');closeM();try{const fu=await BE.fuAdd(n,m,kind);if(fu&&fu.recorded===false){w.location.href=url;toast('FU customer ini sudah tercatat hari ini. WhatsApp tetap dibuka: '+m.nm,'ok');return}try{await BE.log('FOLLOW UP',m.nm+' ('+n+') · '+(kind==='business'?'WhatsApp Business':'WhatsApp Utama'))}catch(logErr){console.warn('Aktivitas tambahan tidak tercatat; histori FU utama sudah tersimpan.',logErr)}w.location.href=url;toast('FU berhasil dicatat di Supabase sebelum WhatsApp dibuka: '+m.nm);render(true)}catch(e){try{w.close()}catch(_){}console.error(e);toast('Pencatatan FU gagal. WhatsApp tidak dibuka: '+(e.message||e),'bad')}}
+
+/* ---------- script WA (PIC otomatis), promo, monitoring, proteksi ---------- */
+function script(m){const o=m.o[0],it=o?o.it:(m.it[0]?m.it[0][0]:'belanja Anda'),P=S.promo||{},base=S.tmp!=null?S.tmp:S.script;
+ let s=base.replace(/{nama}/g,m.nm).replace(/{item}/g,it).replace(/{sales}/g,m.pn).replace(/{pic}/g,m.pn).replace(/{pdd}/g,o?fd(o.pdd):'-').replace(/{promo}/g,P.on&&P.text?P.text:'').replace(/{gambar}/g,P.on&&P.url?P.url:'');
+ if(P.on&&P.text&&!/{promo}/.test(base))s+='\n\n🎁 '+P.text;if(P.on&&P.url&&!/{gambar}/.test(base))s+='\n'+P.url;return s}
+function promoBar(){const P=S.promo||{};return P.on&&P.text?'<div class="mq"><span>🎁 '+esc(P.text)+' &nbsp;&nbsp;&nbsp;&nbsp; 🎁 '+esc(P.text)+'</span></div>':''}
+function tmpScript(){S.tmp=$('sc').value;toast('Script sementara dipakai (tidak tersimpan)');render(true)}
+function resetScript(){S.tmp=null;toast('Kembali ke script utama');render(true)}
+async function saveScript(){if(!isEd()){S.tmp=$('sc').value;BE.log('EDIT SCRIPT SEMENTARA');toast('Script sementara dipakai, kembali ke script utama saat keluar/muat ulang');return render(true)}
+ S.script=$('sc').value;S.tmp=null;await BE.setting('wa_script',S.script);BE.log('UBAH SCRIPT WA');toast('Script utama tersimpan untuk semua');render(true)}
+async function savePromo(){if(!isEd())return deny('Ubah promo');const P=Object.assign({},S.promo||{},{text:$('pt').value.trim(),on:$('pon').checked});S.promo=P;await BE.setting('wa_promo',P);BE.log('UBAH PROMO WA',P.text.slice(0,60));toast('Promo tersimpan dan berjalan untuk semua');render(true)}
+function shrink(f){return new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const k=Math.min(1,1280/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext('2d').drawImage(i,0,0,c.width,c.height);c.toBlob(b=>b?ok(b):no(),'image/jpeg',.85)};i.onerror=no;i.src=URL.createObjectURL(f)})}
+async function upImg(f){if(!isEd())return deny('Upload gambar promo');if(!f)return;if(MODE!=='sb')return toast('Upload gambar butuh Supabase','bad');
+ try{const b=await shrink(f),path='promo-'+Date.now()+'.jpg',r=await sb.storage.from('promo').upload(path,b,{contentType:'image/jpeg'});if(r.error)throw r.error;
+  const url=sb.storage.from('promo').getPublicUrl(path).data.publicUrl,P=Object.assign({},S.promo||{},{url,path,on:true});S.promo=P;await BE.setting('wa_promo',P);BE.log('UPLOAD GAMBAR PROMO',path);toast('Gambar promo terupload');render(true)}catch(e){console.error(e);toast('Gagal upload gambar','bad')}}
+async function delImg(){if(!isEd())return deny('Hapus gambar promo');const P=Object.assign({},S.promo||{});try{if(P.path)await sb.storage.from('promo').remove([P.path])}catch(e){}P.url='';P.path='';S.promo=P;await BE.setting('wa_promo',P);BE.log('HAPUS GAMBAR PROMO');toast('Gambar promo dihapus');render(true)}
+function updMon(){const e=$('mon');if(e)e.innerHTML=monHtml()}
+function startPresence(){if(MODE!=='sb'||!S.uid)return;const ch=sb.channel('m10_online',{config:{presence:{key:S.uid}}});ch.on('presence',{event:'sync'},()=>{S.online=Object.values(ch.presenceState()).map(a=>a[0]);updMon()}).subscribe(async st=>{if(st==='SUBSCRIBED')await ch.track({name:S.user.name,email:S.user.email,role:S.user.role})})}
+function guardInit(){if(isOw())return;document.body.classList.add('guard');
+ const w=document.createElement('div');w.id='wm';const t=esc(S.user.name+' · '+S.user.email+' · '+new Date().toLocaleDateString('id-ID'));
+ w.style.backgroundImage='url("data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="360" height="200"><text x="20" y="110" transform="rotate(-25 180 100)" font-size="14" font-family="sans-serif" fill="#fff" fill-opacity=".09">'+t+'</text></svg>')+'")';document.body.appendChild(w);
+ const blk=(e,w)=>{e.preventDefault();deny(w,1)};
+ addEventListener('keyup',e=>{if(e.key==='PrintScreen'){try{navigator.clipboard.writeText('Dilarang screenshot - Mitra10 Bitung Cikupa').catch(()=>{})}catch(x){}deny('Screenshot layar',1)}});
+ addEventListener('keydown',e=>{const k=(e.key||'').toLowerCase();if(e.key==='F12'||(e.ctrlKey||e.metaKey)&&(['p','s','u'].includes(k)||(e.shiftKey&&['i','s','c','j'].includes(k)))||(e.metaKey&&e.shiftKey&&['3','4','5'].includes(k)))blk(e,'Screenshot / simpan halaman')});
+ addEventListener('contextmenu',e=>e.preventDefault());
+ ['copy','cut'].forEach(ev=>addEventListener(ev,e=>{if(!/INPUT|TEXTAREA/.test((e.target.tagName||'')))blk(e,'Copy data')}));
+ const bl=h=>{const a=$('app');if(a)a.classList.toggle('blurred',h)};addEventListener('blur',()=>bl(true));addEventListener('focus',()=>bl(false));document.addEventListener('visibilitychange',()=>bl(document.hidden))}
+function deny(what,own){BE.log('⚠ PERCOBAAN TIDAK SAH',what);alarm(what,own)}
+
+/* ---------- urut tertinggi/terendah, export Excel (owner), alarm, menu follow up & monitoring ---------- */
+function cv(s){s=(s||'').replace(/\s+/g,' ').trim();let m=s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);if(m)return +(m[3]+m[2]+m[1]);const t=s.replace(/Rp|\s/g,'');
+ if(/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(t))return parseFloat(t.replace(/\./g,'').replace(',','.'));m=t.match(/^-?\d+(\.\d+)?/);return m?parseFloat(m[0]):null}
+function sortTbl(t,c,d){const rs=[...t.rows].slice(1),tb=t.tBodies[0]||t;const k=r=>{const s=r.cells[c]?r.cells[c].innerText:'';return{n:cv(s),s:s.toLowerCase()}};
+ rs.sort((a,b)=>{const x=k(a),y=k(b);if(x.n==null&&y.n==null)return x.s.localeCompare(y.s)*d;if(x.n==null)return 1;if(y.n==null)return -1;return(x.n-y.n)*d});rs.forEach(r=>tb.appendChild(r))}
+function saveXlsx(aoa,name){const ws=XLSX.utils.aoa_to_sheet(aoa),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Data');XLSX.writeFile(wb,'Mitra10_'+name+'_'+TODAY+'.xlsx')}
+function exportTbl(t){if(!isOw())return deny('Export Excel',1);const aoa=[...t.rows].filter(r=>r.style.display!=='none').map(r=>[...r.cells].map(c=>c.innerText.replace(/\s+/g,' ').trim()));saveXlsx(aoa,S.view+'_'+PERIOD.start+'_sd_'+PERIOD.end);BE.log('EXPORT EXCEL',S.view+' ('+(aoa.length-1)+' baris)');toast('Export Excel berhasil')}
+function enhanceTables(){document.querySelectorAll('#main .tw,#mb .tw').forEach(w=>{if(w.dataset.enh||w.closest('#utb'))return;const t=w.querySelector('table');if(!t||t.rows.length<4)return;if((S.view==='member'||S.view==='belum')&&w.closest('#main'))return;w.dataset.enh=1;
+ const hs=[...t.rows[0].cells].map((c,i)=>[i,c.innerText.trim()]).filter(x=>x[1]),bar=document.createElement('div');bar.className='flt sortbar';
+ bar.innerHTML='<input class="tsrch" placeholder="🔍 Cari / ketik nama" style="max-width:190px"><span class="mu">Urutkan:</span><select>'+hs.map(h=>'<option value="'+h[0]+'">'+esc(h[1])+'</option>').join('')+'</select><button class="b x" data-d="-1">⬇ Tertinggi</button><button class="b x" data-d="1">⬆ Terendah</button><button class="b o" data-x="1">📥 Export Excel</button>';
+ w.parentNode.insertBefore(bar,w);const sel=bar.querySelector('select');bar.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>sortTbl(t,+sel.value,+b.dataset.d));bar.querySelector('[data-x]').onclick=()=>exportTbl(t);bar.querySelector('.tsrch').oninput=e=>{const q=e.target.value.toLowerCase();[...t.rows].slice(1).forEach(r=>{r.style.display=!q||r.innerText.toLowerCase().includes(q)?'':'none'})}})}
+function msort(L){const k=S.sk||'y',d=S.sd||-1,v=m=>k=='y'?m.y:k=='tc'?m.tc:k=='nm'?m.nm.toLowerCase():k=='pn'?(m.pn||'').toLowerCase():k=='cl'?m.cl:(fuOf(m)?new Date(fuOf(m).fu_at).getTime():0);
+ return L.sort((a,b)=>{const x=v(a),y=v(b);return(x<y?-1:x>y?1:0)*d})}
+function exportMembers(){if(!isOw())return deny('Export Excel',1);const L=msort(filt());
+ saveXlsx([MH.slice(0,8).concat(['Bispro','Status FU','FU oleh'])].concat(L.map(m=>[m.pic,m.pn,m.n,m.nm,m.ph,m.y,'Class '+m.cl,m.tc,m.bp?'Yes':'No',fuOf(m)?'Sudah FU':'Belum FU',fuOf(m)?fuOf(m).fu_by:''])),'Data_Member_'+PERIOD.start+'_sd_'+PERIOD.end);BE.log('EXPORT EXCEL','Data Member '+L.length+' baris');toast('Export Excel berhasil')}
+function dl(){exportMembers()}
+let _al=0,_ac=null,_so=null;
+function stopSirine(){try{if(_so){clearInterval(_so._iv);_so.stop()}if(_ac)_ac.close()}catch(e){}_so=null;_ac=null}
+function sirine(){try{stopSirine();_ac=new(window.AudioContext||window.webkitAudioContext)();_so=_ac.createOscillator();const g=_ac.createGain();g.gain.value=.25;_so.type='sawtooth';_so.connect(g);g.connect(_ac.destination);_so.start();let t=0;_so._iv=setInterval(()=>{t++;_so.frequency.setValueAtTime(t%2?650:1000,_ac.currentTime)},350);setTimeout(stopSirine,6000)}catch(e){}}
+function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();setTimeout(()=>{o.stop();c.close()},600)}catch(e){}}
+function alarm(what,own){_al++;let o=$('alarm');if(!o){o=document.createElement('div');o.id='alarm';document.body.appendChild(o)}
+ o.innerHTML='<div class="al-b"><div style="font-size:64px">🚨</div><h1>PERINGATAN KEAMANAN</h1><p>Aktivitas terlarang terdeteksi:<br><b style="font-size:18px">'+esc(what)+'</b></p><p>Fitur ini hanya untuk '+(own?'Owner':'Owner/Editor')+'.<br>Nama dan akun Anda ('+esc(S.user?S.user.name:'')+') sudah dilaporkan ke Owner.<br>Percobaan ke-'+_al+'</p><button class="b r" onclick="closeAlarm()">Saya Mengerti</button></div>';
+ o.style.display='flex';sirine();try{navigator.vibrate&&navigator.vibrate([400,150,400,150,400])}catch(e){}}
+function closeAlarm(){const o=$('alarm');if(o)o.style.display='none';stopSirine()}
+function cntBad(){return(S.act||[]).filter(a=>/PERCOBAAN/.test(a.action)).length}
+function ownerAlert(){const a=(S.act||[]).find(x=>/PERCOBAAN/.test(x.action));if(a)toast('🚨 '+(a.name||a.email)+' mencoba: '+(a.detail||'-'),'bad');beep()}
+function monHtml(){const us=S.users||[],ap=us.filter(u=>u.status==='approved'&&u.role!=='owner').length,pe=us.filter(u=>u.status==='pending').length,bl=us.filter(u=>u.status==='blocked').length,on=S.online||[];
+ const g={};(S.act||[]).filter(a=>/PERCOBAAN/.test(a.action)).forEach(a=>{const x=g[a.email]=g[a.email]||{n:a.name||a.email,e:a.email,c:0,l:a.at,t:{}};x.c++;x.t[a.detail||'-']=(x.t[a.detail||'-']||0)+1;if(a.at>x.l)x.l=a.at});const rows=Object.values(g).sort((a,b)=>b.c-a.c);
+ const kp=(l,v,c,s)=>'<div class="card"><small>'+l+'</small><div style="font-size:24px;font-weight:700;color:'+c+'">'+v+'</div><small>'+s+'</small></div>';
+ return '<h3>📊 Monitoring Sales (Owner)</h3><div class="grid">'+kp('Sales disetujui',ap,'var(--tx)','akun aktif terdaftar')+kp('Sedang aktif sekarang',on.length,'var(--gr)',on.map(o=>esc(o.name)).join(', ')||'-')+kp('Menunggu / Diblokir',pe+' / '+bl,'var(--yl)','')+kp('Pelaku percobaan',rows.length,'var(--rd)','orang')+'</div><h3 style="margin-top:12px">🚨 Sales dengan indikasi mengambil data</h3>'+tbl(['Nama','Email','Total percobaan','Rincian percobaan','Terakhir'],rows.map(r=>[esc(r.n),esc(r.e),r.c,Object.entries(r.t).map(([k,v])=>esc(k)+' ×'+v).join('<br>'),new Date(r.l).toLocaleString('id-ID')]),'260px')}
+async function resetFU(n){if(!isOw())return deny('Reset follow up',1);if(!confirm(n?'Reset status FU customer ini menjadi Belum FU?':'Reset SEMUA status FU bulan ini menjadi Belum FU?'))return;
+ if(MODE==='sb'){let q=sb.from('m10_followups').delete().eq('month',MK);if(n)q=q.eq('member_no',n);const r=await q;if(r.error)return toast('Gagal reset: '+r.error.message,'bad')}else if(MODE==='demo'){const f=LS.g('fu_'+MK,{});if(n)delete f[n];else Object.keys(f).forEach(k=>delete f[k]);LS.s('fu_'+MK,f)}
+ if(n)delete S.fu[n];else S.fu={};BE.log('RESET FU',n||'SEMUA');toast('Status FU direset');render(true)}
+
+/* ---------- cuaca hari ini (Cikupa) & pesan owner ---------- */
+function wxInfo(c){return c==0?['☀️','Cerah']:c<=2?['🌤️','Cerah berawan']:c==3?['☁️','Berawan']:(c==45||c==48)?['🌫️','Berkabut']:(c>=51&&c<=57)?['🌦️','Gerimis']:(c>=61&&c<=67)||(c>=80&&c<=82)?['🌧️','Hujan']:c>=95?['⛈️','Badai petir']:['🌥️','Berawan']}
+function wxHtml(){const w=S.wx;if(!w)return'⏳ Memuat cuaca Cikupa…';if(w.err)return'🌐 Cuaca belum tersedia (butuh internet)';const i=wxInfo(w.c),d=wxInfo(w.dc),rain=w.p>=60||w.dc>=95;
+ return i[0]+' <b>Cuaca Cikupa hari ini:</b> '+Math.round(w.t)+'°C sekarang · '+d[1]+' · Maks '+Math.round(w.mx)+'° / Min '+Math.round(w.mn)+'° · Peluang hujan <b>'+w.p+'%</b>'+(rain?' <span style="color:#fbbf24;font-weight:700">⚠ Potensi hujan, pantau jadwal pengiriman (PDD)</span>':'')}
+function wxBar(){return '<div class="wx" id="wx">'+wxHtml()+'</div>'}
+function updWx(){const e=$('wx');if(e)e.innerHTML=wxHtml()}
+async function loadWx(){try{const c=new AbortController();setTimeout(()=>c.abort(),8000);const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=-6.2167&longitude=106.5167&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FJakarta&forecast_days=1',{signal:c.signal}),j=await r.json();
+ S.wx={t:j.current.temperature_2m,c:j.current.weather_code,mx:j.daily.temperature_2m_max[0],mn:j.daily.temperature_2m_min[0],p:j.daily.precipitation_probability_max[0],dc:j.daily.weather_code[0]}}catch(e){if(!S.wx||S.wx.err)S.wx={err:1}}updWx()}
+function msgBar(){const m=S.msg;if(!m||!m.text)return'';return '<div class="om"><b>📢 Pesan dari Owner (Sahroji)</b>'+(isOw()?'<button class="b r" style="float:right" onclick="delMsg()">🗑 Hapus</button>':'')+'<div style="white-space:pre-wrap;margin-top:4px">'+esc(m.text)+'</div><small style="opacity:.8">'+new Date(m.at).toLocaleString('id-ID')+'</small></div>'}
+async function elapsedLogin(ms){if(!ms)return '';const mins=Math.floor(ms/60000);if(mins<60)return mins+' menit';const hrs=Math.floor(mins/60);if(hrs<24)return hrs+' jam';const days=Math.floor(hrs/24);if(days<30)return days+' hari';const months=Math.floor(days/30);return months+' bulan'+(days%30>=15?' '+(days%30)+' hari':'')}
+function reminderBar(){if(!S.user)return '';const now=new Date(),me=S.user.email,name=S.user.name;const rows=(S.fuHistory||[]).filter(x=>(x.fu_email&&x.fu_email===me)||(!x.fu_email&&x.fu_by===name));const today=rows.filter(x=>{const d=new Date(x.fu_at);return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()&&d.getDate()===now.getDate()}).length;const fuNote=today>=5?`😊 Good job, ${esc(name)}! Anda sudah FU ${today} customer hari ini.`:`😔 ${esc(name)}, Anda belum melakukan FU 5 customer hari ini. Saat ini baru ${today} customer.`;const gap=S.loginGap||0;const inactive=gap>=3600000?`<div class="reminder login-gap">⏰ Anda terakhir login ${elapsedLogin(gap)} yang lalu.</div>`:'';return `<div class="reminder ${today>=5?'good':'warn'}">${fuNote}</div>${inactive}`}
+async function sendMsg(){if(!isOw())return deny('Kirim pesan owner',1);const t=$('om').value.trim();if(!t)return toast('Tulis pesan dulu','bad');const m={text:t.slice(0,600),at:new Date().toISOString(),by:'Sahroji'};S.msg=m;await BE.setting('owner_msg',m);BE.log('PESAN OWNER',t.slice(0,60));toast('Pesan terkirim ke semua dashboard');render(true)}
+async function delMsg(){if(!isOw())return deny('Hapus pesan owner',1);S.msg=null;await BE.setting('owner_msg',null);BE.log('HAPUS PESAN OWNER');toast('Pesan dihapus dari semua dashboard');render(true)}
+
+/* ---------- lupa password, reset oleh owner, hapus akun permanen ---------- */
+function showForgot(){$('login').innerHTML='<div class="card">'+brand(70)+'<h2 style="margin-top:14px">Lupa Password</h2><p class="mu">Masukkan email akun Anda. Permintaan dikirim ke dashboard Owner, lalu Owner mengirim link untuk membuat password baru.</p><input id="fe" type="email" placeholder="Email terdaftar"><p style="min-height:18px;color:#fca5a5" id="fm"></p><button class="b o" style="width:100%;padding:10px" onclick="sendForgot()">Kirim Permintaan ke Owner</button><button class="b x" style="width:100%;margin-top:6px" onclick="showLogin()">← Kembali</button></div>'}
+async function sendForgot(){const e=($('fe').value||'').trim().toLowerCase(),m=$('fm');m.style.color='#fca5a5';if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e))return m.textContent='Masukkan email yang valid';if(demo)return m.textContent='Fitur ini butuh Supabase';
+ const r=await sb.from('m10_reset_requests').insert({email:e});if(r.error&&r.error.code!=='23505'&&!/duplicate|unique/i.test(r.error.message||''))return m.textContent=/fetch|network/i.test(r.error.message||'')?'Tidak bisa terhubung ke server':'Gagal mengirim, coba lagi.';
+ m.style.color='#86efac';m.textContent='Permintaan terkirim ke Owner. Link untuk membuat password baru akan dikirim ke email Anda setelah Owner memprosesnya.'}
+function showReset(){$('app').style.display='none';$('login').style.display='flex';$('login').innerHTML='<div class="card">'+brand(70)+'<h2 style="margin-top:14px">Buat Password Baru</h2><p class="mu">Masukkan password baru untuk akun Anda.</p><input id="np1" type="password" placeholder="Password baru (min. 6 karakter)"><input id="np2" type="password" placeholder="Ulangi password baru"><p style="min-height:18px;color:#fca5a5" id="nm"></p><button class="b o" style="width:100%;padding:10px" onclick="saveReset()">Simpan Password Baru</button></div>'}
+async function saveReset(){const a=$('np1').value,b=$('np2').value,m=$('nm');if(a.length<6)return m.textContent='Password minimal 6 karakter';if(a!==b)return m.textContent='Kedua password tidak sama';
+ const r=await sb.auth.updateUser({password:a});if(r.error)return m.textContent='Gagal: '+r.error.message;try{await sb.auth.signOut()}catch(e){}REC=false;try{history.replaceState(null,'',location.pathname)}catch(e){}showLogin('Password berhasil diganti. Silakan masuk dengan password baru.')}
+function rrPend(){return(S.rr||[]).filter(x=>x.status==='pending').length}
+async function loadRR(){if(!isEd())return;try{const r=await sb.from('m10_reset_requests').select('*').order('at',{ascending:false}).limit(100);S.rr=r.data||[]}catch(e){}}
+function rrAlert(){const x=(S.rr||[]).find(r=>r.status==='pending');toast((x?x.email:'Seseorang')+' meminta reset password (lihat Pengaturan)','ok','🔑 ');beep()}
+function rrHtml(){const L=S.rr||[];return '<div class="card" style="margin-bottom:14px"><h3>🔑 Permintaan Reset Password <span class="chip '+(rrPend()?'cD':'cA')+'">'+rrPend()+' menunggu</span></h3><small class="mu">Klik <b>Kirim Link Reset</b>: sistem mengirim email berisi link untuk membuat password baru ke alamat tersebut.</small>'+tbl(['Email','Waktu','Status','Aksi'],L.map(x=>[esc(x.email),new Date(x.at).toLocaleString('id-ID'),x.status==='pending'?'<span class="chip cC">Menunggu</span>':x.status==='sent'?'<span class="chip cA">Link terkirim</span>':'<span class="chip cD">Ditolak</span>',x.status==='pending'?'<button class="b g" onclick="sendReset('+x.id+')">📧 Kirim Link Reset</button> <button class="b r" onclick="rejectReq('+x.id+')">Tolak</button>':'<button class="b x" onclick="rejectReq('+x.id+',1)">Hapus</button>']),'240px')+'</div>'}
+async function sendReset(id){if(!isEd())return deny('Reset password');const x=(S.rr||[]).find(r=>r.id===id);if(!x||MODE!=='sb')return;
+ const r=await sb.auth.resetPasswordForEmail(x.email,{redirectTo:location.origin+location.pathname});if(r.error)return toast('Gagal mengirim link: '+r.error.message,'bad');
+ x.status='sent';await sb.from('m10_reset_requests').update({status:'sent',handled_by:S.user.email}).eq('id',id);BE.log('KIRIM LINK RESET',x.email);toast('Link reset dikirim ke '+x.email);render(true)}
+async function rejectReq(id,del){if(!isEd())return deny('Reset password');const x=(S.rr||[]).find(r=>r.id===id);if(!x||MODE!=='sb')return;
+ if(del){await sb.from('m10_reset_requests').delete().eq('id',id);S.rr=S.rr.filter(r=>r.id!==id)}else{await sb.from('m10_reset_requests').update({status:'rejected',handled_by:S.user.email}).eq('id',id);x.status='rejected';BE.log('TOLAK RESET',x.email)}render(true)}
+function confirmYN(msg){return new Promise(res=>{const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;background:#000b;z-index:99990;display:flex;align-items:center;justify-content:center;padding:16px';
+ o.innerHTML='<div class="card" style="max-width:430px;text-align:center;border:2px solid var(--rd)"><div style="font-size:48px">⚠️</div><h3 style="white-space:pre-line">'+esc(msg)+'</h3><div class="flt" style="justify-content:center"><button class="b r" id="yn1">Ya, hapus permanen</button><button class="b x" id="yn0">Tidak</button></div></div>';
+ document.body.appendChild(o);o.querySelector('#yn1').onclick=()=>{o.remove();res(true)};o.querySelector('#yn0').onclick=()=>{o.remove();res(false)}})}
+async function delUser(id){if(!isOw())return deny('Hapus akun',1);const u=(S.users||[]).find(x=>x.id==id);if(!u||u.role==='owner'||_busy)return;
+ if(!await confirmYN('Apakah Anda yakin menghapus akun ini permanen?\n'+(u.name||'')+' ('+u.email+')\nAkun tidak bisa dikembalikan.'))return;
+ if(MODE!=='sb')return toast('Hapus akun butuh Supabase','bad');_busy=true;
+ try{const r=await sb.rpc('m10_delete_user',{uid:id});if(r.error)return toast('Gagal menghapus: '+r.error.message,'bad');S.users=S.users.filter(x=>x.id!=id);BE.log('HAPUS AKUN',u.email);toast('Akun dihapus permanen: '+u.email);render(true)}finally{_busy=false}}
+/* ---------- navigasi ---------- */
+const NAV=[['home','🏠','Ringkasan'],['member','👥','Data Member'],['sales','🧑‍💼','Kontrol Sales'],['after','📞','Kontrol After Sales'],['belum','🆕','Member Belum / 1x Transaksi'],['bispro','💎','Customer Bispro'],['pdd','🚚','PDD Pengiriman'],['proj','📈','Sales Project & WA'],['fu','✅','Follow Up'],['mon','🚨','Monitoring'],['set','⚙️','Pengaturan / Owner']];
+function go(v,f){const d={q:'',cl:'',fu:'',bp:'',pic:'',pn:'',z:'',t:'',all:false};if(v!==S.view&&!f)Object.assign(S.f,d);S.view=v;S.pg=0;if(f)Object.assign(S.f,d,v==='member'&&Object.keys(f).length?Object.assign({all:true},f):f);render()}
+function render(soft){charts.forEach(c=>c.destroy());charts=[];if(!S.user)return;if(BASE_D){D=makePeriodData();prep();}
+ $('nav').innerHTML=NAV.filter(n=>n[0]!='mon'||isOw()).map(n=>`<button class="${S.view==n[0]?'on':''}" onclick="go('${n[0]}')">${n[1]}<span>${n[2]}</span></button>`).join('');
+ const up=S.up;$('upd').innerHTML=`Data transaksi s/d <b>${fd(D.asof)}</b><br>Upload terakhir: <b>${up?new Date(up.at).toLocaleString('id-ID')+' oleh '+esc(up.by):'data awal (Excel)'}</b>`;
+ $('main').innerHTML=dateBar()+msgBar()+reminderBar()+promoBar()+V[S.view]();if(!soft||true)setTimeout(()=>{if(S.view=='set')filtU();countUp();enhanceTables();(AFTER[S.view]||(()=>0))()},30)}
+const AFTER={};const V={};
+V.mon=()=>'<h2>🚨 Monitoring Aktivitas Terlarang</h2><div class="card" id="mon">'+monHtml()+'</div><div class="card" style="margin-top:14px"><h3>Log aktivitas terbaru</h3>'+tbl(['Waktu','User','Aksi','Detail'],(S.act||[]).map(a=>[new Date(a.at).toLocaleString('id-ID'),esc(a.email),/PERCOBAAN/.test(a.action)?'<span class="no">❌ '+esc(a.action)+'</span>':esc(a.action),esc(a.detail)]),'380px')+'</div>';
+function fuPeriodCounts(){const vals=S.fuHistory&&S.fuHistory.length?S.fuHistory:Object.values(S.fu||{}),today=new Date(),sameDay=d=>{const x=new Date(d);return x.getFullYear()===today.getFullYear()&&x.getMonth()===today.getMonth()&&x.getDate()===today.getDate()},sameMonth=d=>{const x=new Date(d);return x.getFullYear()===today.getFullYear()&&x.getMonth()===today.getMonth()};return{today:vals.filter(x=>x.fu_at&&sameDay(x.fu_at)).length,month:vals.filter(x=>x.fu_at&&sameMonth(x.fu_at)).length,year:vals.filter(x=>x.fu_at&&new Date(x.fu_at).getFullYear()===today.getFullYear()).length}}
+V.fu=()=>{const s=stats(),fc=fuPeriodCounts(),L=(BASE_D||D).members.filter(fuOf).sort((a,b)=>new Date(fuOf(b).fu_at)-new Date(fuOf(a).fu_at)),ow=isOw();
+ return '<h2>Follow Up · '+MON[+MK.slice(4)-1]+' '+MK.slice(0,4)+'</h2><div class="grid">'+kpi('FU Hari Ini',fc.today,'n',"go('fu')",'Aktivitas tanggal hari ini')+kpi('FU Bulan Ini',fc.month,'n',"go('member',{fu:'y'})",'Total pencatatan bulan berjalan')+kpi('FU Tahun Ini',fc.year,'n',"go('fu')",'Total pencatatan tahun berjalan')+kpi('Transaksi kembali ≤7 hari',s.rt,'n',"",'Value '+rp(s.rv))+'</div>'+
+ '<p class="mu">Status FU otomatis kembali ke <b>Belum FU</b> setiap tanggal 1 (awal bulan).'+(ow?' <button class="b r" onclick="resetFU()">↩ Reset semua FU bulan ini</button>':'')+'</p><div class="card">'+
+ tbl(['Customer','PIC','Di-FU oleh','Waktu FU','Transaksi kembali'].concat(ow?['Aksi']:[]),L.map(m=>{const r=ret(m),f=fuOf(m);return['<button class="lnk" onclick="memM(\''+m.n+'\')">'+esc(m.nm)+'</button>',esc(m.pn),esc(f.fu_by),new Date(f.fu_at).toLocaleString('id-ID'),r?'✅ '+r.days+' hari · '+rp(r.v):'-'].concat(ow?['<button class="b x" onclick="resetFU(\''+m.n+'\')">↩ Reset</button>']:[])}),'520px')+'</div>'};
+
+const kpi=(l,v,f,click,sub='')=>`<div class="card kpi" onclick="${click}"><small>${l}</small><div class="v" data-n="${v}" data-f="${f}">0</div><small>${sub}</small></div>`;
+function tbl(h,rows,mh){return `<div class="tw" style="${mh?'max-height:'+mh:''}"><table><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')||'<tr><td colspan="99" class="mu">Belum ada data</td></tr>'}</table></div>`}
+const stats=()=>{const ms=(BASE_D||D).members,lo=inputYmd(PERIOD.start),hi=inputYmd(PERIOD.end),fu=ms.filter(m=>{const f=fuOf(m);if(!f)return false;const d=isoY(new Date(f.fu_at));return d>=lo&&d<=hi}),rt=fu.map(ret).filter(Boolean);return{n:ms.length,fu:fu.length,rt:rt.length,rv:rt.reduce((a,x)=>a+x.v,0),fl:fu}};
+/* ---------- HOME ---------- */
+V.home=()=>{const s=stats(),late=OTS().filter(o=>o.pdd&&o.pdd<TODAY).length;const mi=D.mon.indexOf(Math.max(...D.mon));const dd=[...D.daily].sort((a,b)=>b[1]-a[1])[0];
+ const tp=Object.values(PICS).sort((a,b)=>b.ms.length-a.ms.length).slice(0,8);
+ return `<h2>Ringkasan Store · ${fd(inputYmd(PERIOD.start))} – ${fd(inputYmd(PERIOD.end))}</h2><div class="grid">
+ ${kpi('Total Sales YTD',D.store,'rp',"go('proj')")}${kpi('Member Bertransaksi',s.n,'n',"go('member',{all:true})")}${kpi('Sudah FU bulan ini',s.fu,'n',"go('after')",(s.n?(s.fu/s.n*100).toFixed(1):0)+'% dari member')}
+ ${kpi('Transaksi kembali ≤7 hari',s.rt,'n',"go('after')",'Value '+rp(s.rv))}${kpi('OTS belum terkirim',D.ots.length,'n',"go('pdd')",'Late: '+late)}${kpi('Member Bispro',D.members.filter(m=>m.bp).length,'n',"go('bispro')")}</div>
+ <div class="grid g2" style="margin-top:14px"><div class="card"><h3>Sales per bulan (klik batang) · Tertinggi: <b style="color:var(--or)">${MON[mi]} ${rp(D.mon[mi])}</b></h3><div style="height:260px"><canvas id="c1"></canvas></div></div>
+ <div class="card"><h3>Hari penjualan tertinggi: <b style="color:var(--or)">${fd(dd[0])} · ${rp(dd[1])}</b></h3><div style="height:260px"><canvas id="c2"></canvas></div></div>
+ <div class="card"><h3>Top PIC dengan member terbanyak</h3><div style="height:260px"><canvas id="c3"></canvas></div></div>
+ <div class="card"><h3>Persentase Class Pareto yang di-FU</h3><div style="height:260px"><canvas id="c4"></canvas></div></div></div>`};
+AFTER.home=()=>{mk('c1',{type:'bar',data:{labels:MON,datasets:[{label:'Sales',data:D.mon,backgroundColor:D.mon.map((v,i)=>v==Math.max(...D.mon)?'#ff6a13':'#2f7bff')}]},options:{onClick:(e,a)=>a.length&&monthM(a[0].index),plugins:{legend:{display:false}}}});
+ const d=D.daily.slice(-60);mk('c2',{type:'line',data:{labels:d.map(x=>fd(x[0]).slice(0,5)),datasets:[{label:'Sales harian (60 hari terakhir)',data:d.map(x=>x[1]),borderColor:'#ff6a13',backgroundColor:'#ff6a1333',fill:true,tension:.3}]}});
+ const tp=Object.values(PICS).sort((a,b)=>b.ms.length-a.ms.length).slice(0,8);mk('c3',{type:'bar',data:{labels:tp.map(p=>p.n),datasets:[{label:'Jumlah member',data:tp.map(p=>p.ms.length),backgroundColor:'#22c55e'}]},options:{indexAxis:'y',onClick:(e,a)=>a.length&&go('member',{pic:tp[a[0].index].id}),plugins:{legend:{display:false}}}});
+ const c={A:0,B:0,C:0,D:0};D.members.filter(fuOf).forEach(m=>c[m.cl]++);mk('c4',{type:'doughnut',data:{labels:Object.keys(c).map(k=>'Class '+k),datasets:[{data:Object.values(c),backgroundColor:['#22c55e','#2f7bff','#facc15','#ef4444']}]}})};
+function monthM(i){const k=String(MKY()+String(i+1).padStart(2,'0')),d=D.daily.filter(x=>String(x[0]).startsWith(k)).sort((a,b)=>b[1]-a[1]);
+ modal(`<h2>${MON[i]} · ${rp(D.mon[i])}</h2><p class="mu">Hari tertinggi: <b>${d[0]?fd(d[0][0])+' ('+rp(d[0][1])+')':'-'}</b></p>${tbl(['Tanggal','Sales'],d.map(x=>[fd(x[0]),rp(x[1])]),'420px')}`)}
+const MKY=()=>String(D.asof).slice(0,4);
+function modal(h){$('mb').innerHTML=`<div style="text-align:right"><button class="b x" onclick="closeM()">✖ Tutup</button></div>`+h;$('modal').style.display='flex';enhanceTables()}
+function closeM(){$('modal').style.display='none';charts=charts.filter(c=>{if(c.canvas.closest('#mb')){c.destroy();return false}return true})}
+/* ---------- MEMBER ---------- */
+function filt(){const f=S.f,q=f.q.toLowerCase();return D.members.filter(m=>(f.all||(S.view==='belum'?m.tc===1:m.tc>1))&&(!q||m.nm.toLowerCase().includes(q)||m.n.includes(q)||String(m.ph).includes(q))&&(!f.cl||m.cl==f.cl)&&(!f.pic||m.pic==f.pic)&&(!f.pn||(m.pn||'').toLowerCase().includes(f.pn.toLowerCase()))&&(!f.z||m.z==f.z)&&(!f.fu||(f.fu=='y'?fuOf(m):!fuOf(m)))&&(!f.bp||(f.bp=='y'?m.bp:!m.bp))&&(!f.t||(f.t=='1'?m.tc==1:f.t=='o'?m.o.length:true)))}
+function flt(){const f=S.f,o=(v,l,c)=>`<option value="${v}" ${c==v?'selected':''}>${l}</option>`;
+ return `<div class="flt"><input placeholder="Cari nama / no member / HP" value="${esc(f.q)}" onchange="S.f.q=this.value;S.pg=0;render()">
+ <select onchange="S.f.cl=this.value;S.pg=0;render()">${o('','Semua Class',f.cl)+['A','B','C','D'].map(c=>o(c,'Class '+c,f.cl)).join('')}</select>
+ <select onchange="S.f.fu=this.value;S.pg=0;render()">${o('','Semua status FU',f.fu)+o('y','Sudah FU',f.fu)+o('n','Belum FU',f.fu)}</select>
+ <select onchange="S.f.bp=this.value;S.pg=0;render()">${o('','Bispro/Non',f.bp)+o('y','Bispro Yes',f.bp)+o('n','Bispro No',f.bp)}</select>
+ <select onchange="S.f.z=this.value;S.pg=0;render()">${o('','Semua Zona',f.z)+[1,2,3,4].map(z=>o(z,'Zona '+z,f.z)).join('')}</select>
+ <select onchange="S.f.t=this.value;S.pg=0;render()">${o('','Semua',f.t)+o('o','Ada OTS belum kirim',f.t)}</select>
+ <input list="piclist" placeholder="Cari PIC sales (ketik nama)" value="${esc(f.pn||(f.pic&&PICS[f.pic]?PICS[f.pic].n:''))}" onchange="S.f.pn=this.value;S.f.pic='';S.pg=0;render()"><datalist id="piclist">${Object.values(PICS).sort((a,b)=>a.n.localeCompare(b.n)).map(p=>'<option value="'+esc(p.n)+'">').join('')}</datalist>
+ <button class="b x" onclick="go(S.view,{})">Reset</button> <span class="mu">Urutkan:</span><select onchange="S.sk=this.value;S.pg=0;render()">${[['y','Sales YTD'],['tc','Frekuensi transaksi'],['nm','Nama customer'],['pn','PIC'],['cl','Pareto class'],['fu','Waktu FU']].map(x=>o(x[0],x[1],S.sk||'y')).join('')}</select><button class="b x" onclick="S.sd=-1;S.pg=0;render()">⬇ Tertinggi</button><button class="b x" onclick="S.sd=1;S.pg=0;render()">⬆ Terendah</button> <button class="b o" onclick="exportMembers()">📥 Export Excel</button></div>`}
+function memRows(L){return L.map(m=>{const f=fuOf(m),o=m.o;return [esc(m.pic||'-'),esc(m.pn),`<button class="lnk" onclick="memM('${m.n}')">${m.n}</button>`,
+ m.ph?`<button class="b g" onclick="wa('${m.n}',event)">💬 ${esc(m.ph)}</button>`:'',esc(m.nm),esc(m.ph||'-'),'<span class="r">'+rp(m.y)+'</span>',clChip(m.cl),m.tc==1?'<span class="chip cD">1x transaksi</span>':m.tc+'x',bpTag(m),
+ o.length?`<span class="no">Belum terkirim</span><br><small>PDD ${fd(o[0].pdd)}: ${esc(o.map(x=>x.it+' x'+x.q).join('; ').slice(0,120))}</small>`:'<span style="color:var(--gr)">Terkirim / tidak ada OTS</span>',
+ f?`👍 <small>${esc(f.fu_by)}<br>${new Date(f.fu_at).toLocaleDateString('id-ID')}</small>`:'<span class="mu">Belum FU</span>']})}
+const MH=['PIC ID','PIC Name','No Member','WhatsApp','Nama Customer','Phone','Sales YTD','Pareto','Frekuensi','Bispro','OTS / PDD & Item','Status FU'];
+V.member=()=>{const L=msort(filt()),P=50,pages=Math.ceil(L.length/P);return `<h2>Data Member <small class="mu">(${L.length.toLocaleString('id-ID')} member)</small></h2>${flt()}${tbl(MH,memRows(L.slice(S.pg*P,S.pg*P+P)),'620px')}
+ <div class="flt" style="margin-top:10px"><button class="b x" onclick="S.pg=Math.max(0,S.pg-1);render()">◀</button> Hal ${S.pg+1}/${pages||1} <button class="b x" onclick="S.pg=Math.min(${pages-1},S.pg+1);render()">▶</button></div>`};
+
+/* ---------- DETAIL MEMBER ---------- */
+function memM(n){const m=MM[n]||(BASE_D&&BASE_D.members.find(x=>x.n===n));if(!m)return toast('Detail member tidak ditemukan pada data aktif','bad');m.pn=m.pn||((BASE_D||D).sp[m.pic]||m.pic||'-');m.o=m.o||[];const f=fuOf(m),r=ret(m);const ots=m.o.map(x=>x.it);
+ modal(`<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">${logoSvg(36)}<h2 style="margin:0">${esc(m.nm)} ${f?'👍':''}</h2>${clChip(m.cl)} ${bpTag(m)}
+ <span style="margin-left:auto"><button class="b g" onclick="wa('${n}',event);closeM()">💬 WhatsApp + Script After Sales</button></span></div>
+ <div class="kv"><div><small>PIC Salper ID yang FU</small>${esc(m.pic)}</div><div><small>PIC Salper Name</small>${esc(m.pn)}</div><div><small>No Member</small>${m.n}</div><div><small>Nama Customer</small>${esc(m.nm)}</div>
+ <div><small>Phone / WhatsApp</small>${m.ph?`<button class="lnk" onclick="wa('${n}',event)">${esc(m.ph)}</button>`:'-'}</div><div><small>Sales YTD</small>${rp(m.y)}</div><div><small>Ket Pareto</small>Class ${m.cl}</div>
+ <div><small>Bispro</small>${m.bp?`<span class="yes">Yes</span> · ${m.bp.tier} · Komitmen ${rp(m.bp.com)}<br><small>Tercapai ${rp(m.bp.val)} (${(m.bp.val/m.bp.com*100).toFixed(0)}%)</small>`:'<span class="no">No</span>'}</div>
+ <div><small>Status FU bulan ini</small>${f?'👍 '+esc(f.fu_by)+' · '+new Date(f.fu_at).toLocaleDateString('id-ID'):'Belum FU'}</div>
+ <div><small>Transaksi kembali ≤7 hari</small>${r?`Ya, ${r.days} hari · ${rp(r.v)}`:'-'}</div><div><small>Zona dominan</small>Zona ${m.z}</div><div><small>Barang diterima?</small>${m.o.length?'<span class="no">Ada '+m.o.length+' item belum diterima</span>':'Semua sudah diterima'}</div></div>
+ <div class="grid g2"><div class="card"><h3>Transaksi & frekuensi visit per bulan</h3><div style="height:230px"><canvas id="m1"></canvas></div></div><div class="card"><h3>Value belanja per kategori</h3><div style="height:230px"><canvas id="m2"></canvas></div></div></div>
+ <h3>Item yang dibeli</h3>${tbl(['Item','Qty','Value','Terakhir beli','Status'],m.it.map(i=>[esc(i[0]),i[1],rp(i[2]),fd(i[3]),ots.some(o=>o.slice(0,25)==i[0].slice(0,25))?'<span class="no">Belum diterima</span>':'Diterima'])) }
+ <h3>Transaksi by month</h3>${tbl(MON,[m.m.map(rp),m.v.map(v=>v+' visit')])}
+ ${m.o.length?'<h3>Barang belum terkirim</h3>'+tbl(['NP','Item','Qty','PDD','Tipe','Sales'],m.o.map(o=>[o.np,esc(o.it),o.q,fd(o.pdd),esc(o.ty),esc(o.pn)])):''}
+ <h3>Script After Sales (preview)</h3>${(S.promo||{}).on&&(S.promo||{}).url?'<img src="'+esc(S.promo.url)+'" style="max-height:120px;border-radius:8px">':''}<pre style="white-space:pre-wrap;background:#18233e;padding:10px;border-radius:9px">${esc(script(m))}</pre>`);
+ mk('m1',{type:'bar',data:{labels:MON,datasets:[{label:'Value',data:m.m,backgroundColor:'#2f7bff',yAxisID:'y'},{label:'Visit',type:'line',data:m.v,borderColor:'#ff6a13',yAxisID:'y1'}]},options:{scales:{y1:{position:'right',ticks:{color:'#ff6a13'},grid:{display:false}}}}});
+ const ci=m.c.map((v,i)=>[D.cats[i],v]).filter(x=>x[1]>0);mk('m2',{type:'bar',data:{labels:ci.map(x=>x[0]),datasets:[{label:'Value',data:ci.map(x=>x[1]),backgroundColor:'#22c55e'}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}})}
+/* ---------- LEADERBOARD FU BERDASARKAN PERIODE ---------- */
+function fuLeaderboard(period){const now=new Date();let start,end;if(period==='today'){start=new Date(now.getFullYear(),now.getMonth(),now.getDate());end=new Date(start);end.setDate(end.getDate()+1)}else if(period==='month'){start=new Date(now.getFullYear(),now.getMonth(),1);end=new Date(now.getFullYear(),now.getMonth()+1,1)}else if(period==='year'){start=new Date(now.getFullYear(),0,1);end=new Date(now.getFullYear()+1,0,1)}else{start=new Date(now.getFullYear()-1,0,1);end=new Date(now.getFullYear(),0,1)}const lo=start.getTime(),hi=end.getTime(),groups={};(S.fuHistory||[]).forEach(r=>{const t=new Date(r.fu_at).getTime();if(!r.fu_at||t<lo||t>=hi)return;const key=r.fu_by||r.fu_email||'Tidak diketahui';(groups[key]=groups[key]||[]).push(r)});return Object.entries(groups).map(([name,rows])=>({name,rows,total:rows.length})).sort((a,b)=>b.total-a.total||a.name.localeCompare(b.name))}
+function fuBoardHtml(period,title){const L=fuLeaderboard(period);return `<div class="card"><h3>${title}</h3>${tbl(['Peringkat','Nama Sales','Total FU'],L.slice(0,10).map((x,i)=>[i+1,`<button class="lnk" onclick="salesFuDetail(decodeURIComponent('${encodeURIComponent(x.name)}'),'${period}')">${esc(x.name)}</button>`,x.total]),'320px')}</div>`}
+/* ---------- KONTROL SALES ---------- */
+V.sales=()=>{const P=Object.values(PICS).map(p=>{const fu=p.ms.filter(fuOf);return{...p,t:p.ms.length,f:fu.length,rt:fu.filter(ret).length,rv:fu.reduce((a,m)=>a+(ret(m)?ret(m).v:0),0)}});const byFU={};D.members.filter(fuOf).forEach(m=>{const k=fuOf(m).fu_by;(byFU[k]=byFU[k]||[]).push(m)});
+ const low=[...P].filter(p=>p.t>=20).sort((a,b)=>a.f/a.t-b.f/b.t).slice(0,10);
+ return `<h2>Kontrol Sales</h2><div class="grid g2"><div class="card"><h3>Top PIC member terbanyak</h3><div style="height:300px"><canvas id="s1"></canvas></div></div>
+ <div class="card"><h3>⚠ Sales dengan FU terendah (PIC ≥20 member)</h3>${tbl(['Sales','Member','Sudah FU','%'],low.map(p=>[`<button class="lnk" onclick="go('member',{pic:'${p.id}',fu:'n'})">${esc(p.n)}</button>`,p.t,p.f,`<div class="bar"><i style="width:${p.f/p.t*100}%"></i></div>${(p.f/p.t*100).toFixed(1)}%`]),'300px')}</div></div>
+ <div class="card" style="margin-top:14px"><h3>Monitoring Follow Up Sales · Ranking tertinggi</h3><div class="grid g2">${fuBoardHtml('today','🏆 FU Tertinggi Hari Ini')}${fuBoardHtml('month','📅 FU Tertinggi Bulan Ini')}${fuBoardHtml('year','📈 FU Tertinggi Tahun Ini')}${fuBoardHtml('lastyear','🗓️ FU Tertinggi Tahun Lalu')}</div></div>
+ <div class="card" style="margin-top:14px"><h3>Semua PIC (klik nama untuk melihat member)</h3>${tbl(['PIC','Member','Sudah FU','Belum FU','Transaksi kembali','Value hasil FU'],P.sort((a,b)=>b.t-a.t).map(p=>[`<button class="lnk" onclick="go('member',{pic:'${p.id}'})">${esc(p.n)}</button>`,p.t,p.f,p.t-p.f,p.rt,rp(p.rv)]),'400px')}</div>`};
+function salesFuDetail(name,period='month'){const now=new Date();let start,end;if(period==='today'){start=new Date(now.getFullYear(),now.getMonth(),now.getDate());end=new Date(start);end.setDate(end.getDate()+1)}else if(period==='month'){start=new Date(now.getFullYear(),now.getMonth(),1);end=new Date(now.getFullYear(),now.getMonth()+1,1)}else if(period==='year'){start=new Date(now.getFullYear(),0,1);end=new Date(now.getFullYear()+1,0,1)}else{start=new Date(now.getFullYear()-1,0,1);end=new Date(now.getFullYear(),0,1)}const records=(S.fuHistory||[]).filter(x=>(x.fu_by||x.fu_email)===name&&new Date(x.fu_at)>=start&&new Date(x.fu_at)<end).sort((a,b)=>new Date(b.fu_at)-new Date(a.fu_at));const L=records.map(f=>({m:(BASE_D||D).members.find(m=>m.n===f.member_no),f}));modal(`<h2>Detail Follow Up · ${esc(name)}</h2><p class="mu">Total ${records.length} pencatatan FU pada periode ${esc(period)}.</p>${tbl(['Customer','No Member','PIC Sales','Tanggal FU','Transaksi kembali'],L.map(({m,f})=>{const r=m?ret(m):null;return[m?`<button class="lnk" onclick="closeM();memM('${m.n}')">${esc(m.nm)}</button>`:'-',f.member_no,m?esc(m.pn):'-',new Date(f.fu_at).toLocaleString('id-ID'),r?'Ya · '+r.days+' hari · '+rp(r.v):'-']}),'500px')}`)}
+AFTER.sales=()=>{const tp=Object.values(PICS).sort((a,b)=>b.ms.length-a.ms.length).slice(0,10);mk('s1',{type:'bar',data:{labels:tp.map(p=>p.n),datasets:[{data:tp.map(p=>p.ms.length),backgroundColor:'#ff6a13'}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}})};
+/* ---------- KONTROL AFTER SALES ---------- */
+V.after=()=>{const s=stats(),CL=['A','B','C','D'];const cc=CL.map(c=>{const l=D.members.filter(m=>m.cl==c);return{c,t:l.length,f:l.filter(fuOf).length}});const sh=s.fu||1;
+ const zc=(l)=>CL.map(c=>{const x=l.filter(m=>m.cl==c);const f=x.filter(fuOf).length;return `<td>${f} / ${x.length}<small class="mu"> (${x.length-f} belum)</small></td>`}).join('');
+ const R=D.members.filter(m=>ret(m)).map(m=>[`<button class="lnk" onclick="memM('${m.n}')">${esc(m.nm)}</button>`,esc(fuOf(m).fu_by),new Date(fuOf(m).fu_at).toLocaleDateString('id-ID'),fd(ret(m).d),ret(m).days+' hari',rp(ret(m).v)]);
+ return `<h2>Kontrol After Sales</h2><div class="grid">${kpi('Total Sudah FU',s.fu,'n',"go('member',{fu:'y'})")}${kpi('Belum FU',s.n-s.fu,'n',"go('member',{fu:'n'})")}${kpi('Transaksi kembali ≤7 hari',s.rt,'n',"go('after')",'Success '+(s.fu?(s.rt/s.fu*100).toFixed(1):0)+'%')}${kpi('Value hasil FU',s.rv,'rp',"go('after')")}</div>
+ <div class="grid g2" style="margin-top:14px"><div class="card"><h3>Class Pareto: FU vs Belum FU</h3><div style="height:260px"><canvas id="a1"></canvas></div></div><div class="card"><h3>% Class yang paling banyak di-FU</h3>${cc.map(x=>`<p>${clChip(x.c)} ${x.f} FU (${(x.f/sh*100).toFixed(1)}% dari seluruh FU) · coverage ${x.t?(x.f/x.t*100).toFixed(1):0}%<div class="bar"><i style="width:${x.f/sh*100}%"></i></div></p>`).join('')}</div></div>
+ <div class="card" style="margin-top:14px"><h3>Kontrol per PIC Sales (FU / Total customer, per class)</h3><div class="tw"><table><tr><th>Nama PIC Sales</th><th>Zona</th>${CL.map(c=>`<th>Class ${c}</th>`).join('')}</tr>
+ ${Object.values(PICS).sort((a,b)=>a.n.localeCompare(b.n)).map(p=>{const ms=p.ms;const zones=[...new Set(ms.map(m=>m.z))].sort().join(', ');return `<tr><td><button class="lnk" onclick="go('member',{pic:'${p.id}'})">${esc(p.n)}</button></td><td>${zones||'-'}</td>${zc(ms)}</tr>`}).join('')}</table></div></div>
+ <div class="card" style="margin-top:14px"><h3>✅ Customer transaksi kembali setelah FU (maks. 1 minggu)</h3>${tbl(['Customer','Di-FU oleh','Tgl FU','Tgl transaksi kembali','Jeda','Value'],R,'300px')}</div>`};
+AFTER.after=()=>{const CL=['A','B','C','D'];const f=CL.map(c=>D.members.filter(m=>m.cl==c&&fuOf(m)).length),t=CL.map(c=>D.members.filter(m=>m.cl==c).length);mk('a1',{type:'bar',data:{labels:CL.map(c=>'Class '+c),datasets:[{label:'Sudah FU',data:f,backgroundColor:'#22c55e'},{label:'Belum FU',data:t.map((x,i)=>x-f[i]),backgroundColor:'#ef4444'}]},options:{scales:{x:{stacked:true,ticks:{color:'#8fa0bf'}},y:{stacked:true,ticks:{color:'#8fa0bf'}}}}})};
+/* ---------- BELUM / 1x ---------- */
+V.belum=()=>{const one=D.members.filter(m=>m.tc==1);return `<h2>Member Belum Transaksi / Baru 1x Transaksi</h2><div class="grid">${kpi('Member belum pernah transaksi',D.new.length,'n',"")}${kpi('Member transaksi 1x',one.length,'n',"go('member',{t:'1'})",'Sudah FU: '+one.filter(fuOf).length)}</div>
+ <div class="card" style="margin-top:14px"><h3>Member belum pernah transaksi (WhatsApp)</h3>${tbl(['No Member','Nama','WhatsApp'],D.new.map(x=>[x[0],esc(x[1]),x[2]?`<a class="b g" target="_blank" href="https://wa.me/${ph(x[2])}?text=${encodeURIComponent(S.script.replace(/{nama}/g,x[1]).replace(/{item}/g,'belanja Anda').replace(/{sales}/g,'Tim Mitra10 Bitung Cikupa').replace(/{pic}/g,'-').replace(/{pdd}/g,'-'))}">💬 ${esc(x[2])}</a>`:'-']),'260px')}</div>
+ <div class="card" style="margin-top:14px"><h3>Transaksi 1x (30 value terbesar)</h3>${tbl(MH,memRows(one.sort((a,b)=>b.y-a.y).slice(0,30)),'420px')}</div>`};
+/* ---------- BISPRO ---------- */
+V.bispro=()=>{const b=D.members.filter(m=>m.bp).sort((a,b)=>b.bp.val-a.bp.val);return `<h2>Customer Bispro</h2><div class="grid">${kpi('Member Bispro',b.length,'n',"")}${kpi('Total transaksi Bispro',b.reduce((a,m)=>a+m.bp.val,0),'rp',"")}${kpi('Sudah FU',b.filter(fuOf).length,'n',"go('member',{bp:'y'})")}</div>
+ <div class="card" style="margin-top:14px"><h3>Progres komitmen Bispro</h3>${tbl(['Nama','No Member','Tier','Komitmen','Tercapai','Progres','PIC','Bispro','FU'],b.map(m=>[`<button class="lnk" onclick="memM('${m.n}')">${esc(m.nm)}</button>`,m.n,m.bp.tier,rp(m.bp.com),rp(m.bp.val),`<div class="bar"><i style="width:${Math.min(100,m.bp.val/m.bp.com*100)}%"></i></div>${(m.bp.val/m.bp.com*100).toFixed(0)}%`,esc(m.pn),bpTag(m),fuOf(m)?'👍':'-']))}</div>`};
+/* ---------- PDD ---------- */
+V.pdd=()=>{const O=OTS(),L=O.filter(o=>o.pdd&&o.pdd<TODAY),H=n=>O.filter(o=>o.pdd==addD(TODAY,n));const row=o=>[`<button class="lnk" onclick="${MM[o.mn]?`memM('${o.mn}')`:''}">${esc(o.cu)}</button>`,esc(o.it),o.q,fd(o.pdd),esc(o.pn),esc(o.ty)+(o.pdd<TODAY?` <span class="no">(late ${diffD(o.pdd,TODAY)} hari)</span>`:'')];const H_=['Customer','Item','Qty','PDD','PIC Sales','Tipe Pengiriman'];
+ return `<h2>PDD Pengiriman</h2><div class="grid">${kpi('Belum terkirim',O.length,'n',"")}${kpi('Reminder H-3',H(3).length,'n',"")}${kpi('Reminder H-2',H(2).length,'n',"")}${kpi('Reminder H-1',H(1).length,'n',"")}${kpi('Late pengiriman',L.length,'n',"")}</div>
+ <div class="grid g2" style="margin-top:14px"><div class="card"><h3>Item belum terkirim per tipe pengiriman</h3><div style="height:240px"><canvas id="p1"></canvas></div></div><div class="card"><h3>🔴 Late pengiriman</h3>${tbl(H_,L.map(row),'240px')}</div></div>
+ ${[3,2,1].map(n=>`<div class="card" style="margin-top:14px"><h3>⏰ Reminder PDD H-${n} (${fd(addD(TODAY,n))})</h3>${tbl(H_,H(n).map(row),'200px')}</div>`).join('')}
+ <div class="card" style="margin-top:14px"><h3>Seluruh item belum terkirim</h3>${tbl(H_,O.map(row),'420px')}</div>`};
+AFTER.pdd=()=>{const t={};OTS().forEach(o=>t[o.ty]=(t[o.ty]||0)+1);mk('p1',{type:'doughnut',data:{labels:Object.keys(t),datasets:[{data:Object.values(t),backgroundColor:PAL}]},options:{plugins:{legend:{position:'bottom',labels:{color:'#cfe0ff',boxWidth:10,font:{size:10}}}}}})};
+/* ---------- PROJECT & WA ---------- */
+V.proj=()=>{const T=D.store,P=D.src['Sales Project'].tot,W=D.src['WhatsApp'].tot;const tb=k=>tbl(['Sales','Value','Kontribusi store','Receipt'],Object.entries(D.src[k].sp).sort((a,b)=>b[1].v-a[1].v).map(([id,x])=>[`<button class="lnk" onclick="srcM('${k}','${id}')">${esc(D.sp[id]||id)}</button>`,rp(x.v),(x.v/T*100).toFixed(2)+'%',x.r]),'340px');
+ return `<h2>Sales Project & WhatsApp</h2><div class="grid">${kpi('Sales Project',P,'rp',"",(P/T*100).toFixed(2)+'% dari total store')}${kpi('Sales WhatsApp',W,'rp',"",(W/T*100).toFixed(2)+'% dari total store')}${kpi('Lainnya (Stationary)',T-P-W,'rp',"",((T-P-W)/T*100).toFixed(2)+'%')}</div>
+ <div class="grid g2" style="margin-top:14px"><div class="card"><h3>Kontribusi dari total sales store</h3><div style="height:250px"><canvas id="j1"></canvas></div></div><div class="card"><h3>Sales per bulan (klik)</h3><div style="height:250px"><canvas id="j2"></canvas></div></div>
+ <div class="card"><h3>Sales Project per sales</h3>${tb('Sales Project')}</div><div class="card"><h3>Sales WhatsApp per sales</h3>${tb('WhatsApp')}</div></div>`};
+AFTER.proj=()=>{const T=D.store,P=D.src['Sales Project'].tot,W=D.src['WhatsApp'].tot;mk('j1',{type:'doughnut',data:{labels:['Project','WhatsApp','Stationary'],datasets:[{data:[P,W,T-P-W],backgroundColor:['#ff6a13','#22c55e','#2f7bff']}]}});
+ const mm=k=>MON.map((_,i)=>Object.values(D.src[k].sp).reduce((a,x)=>a+x.m[i],0));mk('j2',{type:'bar',data:{labels:MON,datasets:[{label:'Project',data:mm('Sales Project'),backgroundColor:'#ff6a13'},{label:'WhatsApp',data:mm('WhatsApp'),backgroundColor:'#22c55e'}]},options:{onClick:(e,a)=>a.length&&monthM(a[0].index)}})};
+function srcM(k,id){const x=D.src[k].sp[id];modal(`<h2>${k} · ${esc(D.sp[id]||id)}</h2><p>Total <b>${rp(x.v)}</b> · ${(x.v/D.store*100).toFixed(2)}% dari total store · ${x.r} receipt</p><div style="height:220px"><canvas id="sm"></canvas></div><h3>Top customer</h3>${tbl(['Customer','Value'],x.top.map(t=>[esc(t[0]),rp(t[1])]))}`);mk('sm',{type:'bar',data:{labels:MON,datasets:[{label:'Value',data:x.m,backgroundColor:'#ff6a13'}]}})}
+/* ---------- PENGATURAN ---------- */
+V.set=()=>{const ed=isEd();return `<h2>Pengaturan & Monitoring Owner</h2>${isOw()?'<div class="card" id="mon" style="margin-bottom:14px">'+monHtml()+'</div>':''}${isEd()?rrHtml():''}${isOw()?'<div class="card" style="margin-bottom:14px"><h3>📢 Pesan untuk Semua Dashboard</h3><small class="mu">Pesan tampil di bagian atas semua dashboard (owner, editor, sales) sampai Anda menghapusnya.</small><textarea id="om" maxlength="600" placeholder="Tulis informasi untuk tim, mis. Besok briefing jam 08.00">'+esc((S.msg&&S.msg.text)||'')+'</textarea><div class="flt" style="margin-top:8px"><button class="b o" onclick="sendMsg()">📤 Kirim ke Semua</button>'+(S.msg&&S.msg.text?'<button class="b r" onclick="delMsg()">🗑 Hapus Pesan</button>':'')+'</div></div>':''}<div class="grid g2"><div class="card"><h3>Script WhatsApp After Sales</h3><small class="mu">Variabel: {nama} {item} {sales} {pic} {pdd} {promo} {gambar}. {sales}/{pic} otomatis = nama sales yang meng-handle customer.</small>
+<textarea id="sc">${esc(S.tmp!=null?S.tmp:S.script)}</textarea>
+<div class="flt" style="margin-top:8px"><button class="b o" onclick="saveScript()">${ed?'💾 Simpan Script Utama':'⏱ Pakai Sementara (tidak tersimpan)'}</button>${ed?'<button class="b x" onclick="tmpScript()">⏱ Pakai Sementara</button>':''}${S.tmp!=null?'<button class="b r" onclick="resetScript()">↩ Kembali ke Script Utama</button><span class="chip cC">Mode sementara aktif</span>':''}</div>
+<small class="mu">Perubahan oleh sales hanya berlaku sementara di perangkat ini dan kembali ke script utama saat keluar atau dimuat ulang.</small>
+<hr style="border-color:#25334f"><h3>🎁 Promo Berjalan &amp; Gambar</h3>
+<input id="pt" style="width:100%" placeholder="Teks promo berjalan, mis. Diskon cat 20% sampai 30 Nov" value="${esc((S.promo||{}).text||'')}" ${ed?'':'disabled'}>
+<label><input type="checkbox" id="pon" ${(S.promo||{}).on?'checked':''} ${ed?'':'disabled'}> Aktifkan promo di semua pesan WA</label>
+${(S.promo||{}).url?'<br><img src="'+esc(S.promo.url)+'" style="max-width:100%;max-height:160px;border-radius:10px;margin-top:6px">':''}
+${ed?'<div class="flt" style="margin-top:8px"><input type="file" id="pimg" accept="image/*" style="display:none" onchange="upImg(this.files[0])"><button class="b x" onclick="'+(MODE==='sb'?"$('pimg').click()":"toast('Upload gambar butuh Supabase','bad')")+'">🖼 Upload Gambar Promo</button><button class="b o" onclick="savePromo()">💾 Simpan Promo</button>'+((S.promo||{}).url?'<button class="b r" onclick="delImg()">Hapus Gambar</button>':'')+'</div>':'<small class="mu">Promo diatur oleh Owner/Editor.</small>'}</div>
+ <div class="card"><h3>Upload Data</h3><p class="mu">Pilih <b>2 file Excel sekaligus</b> (Kontrol After Sales + Sales Detail). Diolah otomatis di browser, lalu semua pengguna langsung ter-update.</p><input type="file" id="uf" accept=".xlsx,.json" multiple style="display:none" onchange="upl(this.files)"><button class="b o" onclick="isEd()?$('uf').click():deny('Upload data')">⬆ Upload Data</button> <button class="b x" onclick="exportMembers()">📥 Export Excel (Owner)</button></div></div>
+ ${ed?`<div class="card" style="margin-top:14px"><h3>Approval akun</h3>${MODE=='cl'?'<p class="mu">Akses diatur lewat tombol <b>Share</b> di claude.ai: undang email sales sebagai <b>Contributor</b> (agar bisa follow up). Cabut akses = kick.</p>':''}<div class="flt"><input placeholder="🔍 Cari nama / email user" value="${esc(S.uq||'')}" oninput="S.uq=this.value;filtU()"><select onchange="S.us=this.value;filtU()"><option value="">Semua status</option><option value="pending" ${S.us=='pending'?'selected':''}>Menunggu persetujuan</option><option value="approved" ${S.us=='approved'?'selected':''}>Disetujui</option><option value="blocked" ${S.us=='blocked'?'selected':''}>Diblokir</option></select> <small class="mu">${(S.users||[]).filter(u=>u.status==='pending').length} menunggu persetujuan</small></div><div id="utb">${tbl(['Email','Nama','Role','Status','Aksi'],(S.users||[]).map(u=>[esc(u.email),esc(u.name||''),u.role,u.status,uAct(u)]),'260px')}</div></div>`:''}
+ ${isOw()?`<div class="card" style="margin-top:14px"><h3>🛡 Log aktivitas seluruh pengguna (Owner)</h3>${tbl(['Waktu','User','Aksi','Detail'],S.act.map(a=>[new Date(a.at).toLocaleString('id-ID'),esc(a.email),/PERCOBAAN/.test(a.action)?'<span class="no">❌ '+esc(a.action)+'</span>':esc(a.action),esc(a.detail)]),'380px')}</div>`:'<p class="mu">Log aktivitas hanya terlihat oleh Owner.</p>'}`};
+
+function filtU(){const q=(S.uq||'').toLowerCase(),st=S.us||'';document.querySelectorAll('#utb table tr').forEach((r,i)=>{if(!i)return;const t=r.innerText.toLowerCase();r.style.display=(!q||t.includes(q))&&(!st||t.includes(st))?'':'none'})}
+let _busy=false;
+function uAct(u){if(u.role==='owner')return '<span class="mu">Owner (dilindungi)</span>';if(!isOw()&&u.role!=='member')return '<span class="mu">Hanya Owner</span>';
+ const ap=u.status==='approved',bl=u.status==='blocked',dis='disabled style="opacity:.45;cursor:not-allowed"';
+ return `<button class="b ${ap?'x':'g'}" ${ap?dis:''} onclick="setU('${u.id}','approved')">${ap?'✔ Disetujui':'Approve'}</button> <button class="b ${bl?'x':'r'}" ${bl?dis:''} onclick="setU('${u.id}','blocked')">${bl?'⛔ Diblokir':'Kick'}</button> ${isOw()&&ap&&u.role==='member'?`<button class="b x" onclick="setRole('${u.id}','editor')">⭐ Jadikan Editor</button>`:''}${u.role==='editor'?' <span class="chip cB">Editor</span>'+(isOw()?` <button class="b x" onclick="setRole('${u.id}','member')">↩ Jadikan Member</button>`:''):''}${isOw()?` <button class="b r" onclick="delUser('${u.id}')">🗑 Hapus Akun</button>`:''}`}
+async function setU(id,st){if(_busy)return;const u=(S.users||[]).find(x=>x.id==id);if(!u||u.status===st||u.role==='owner'||(!isOw()&&u.role!=='member'))return;_busy=true;
+ try{u.status=st;render(true);await BE.setUser(id,{status:st});await BE.log(st==='approved'?'APPROVE':'KICK',u.email)}finally{_busy=false}}
+async function setRole(id,to){to=to||'editor';if(_busy)return;const u=(S.users||[]).find(x=>x.id==id);if(!u||!isOw()||u.role==='owner'||u.role===to)return;_busy=true;
+ try{u.role=to;render(true);await BE.setUser(id,{role:to});await BE.log(to==='editor'?'JADIKAN EDITOR':'JADIKAN MEMBER',u.email)}finally{_busy=false}}
+async function kickOut(st){S.user=null;try{await sb.auth.signOut()}catch(e){}charts.forEach(c=>c.destroy());charts=[];showLogin(st==='blocked'?'Akses Anda dicabut oleh Owner/Editor.':'Akun Anda tidak lagi disetujui.')}
+async function upl(files){if(!isEd())return deny('Upload data');files=[...files];if(!files.length)return;toast('Memproses file… mohon tunggu 20-60 detik');await new Promise(r=>setTimeout(r,60));
+ try{let j=null,SR=null,K=null;for(const f of files){if(/\.json$/i.test(f.name)){j=JSON.parse(await f.text());continue}
+   const buf=await f.arrayBuffer();let wb=XLSX.read(buf,{type:'array',sheets:['Member','Bispro','Ots Nota penjualan']});
+   if(wb.SheetNames.includes('Member')&&wb.SheetNames.includes('Bispro')){const g=n=>XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null});K={M:g('Member'),B:g('Bispro'),O:g('Ots Nota penjualan')}}
+   else{wb=XLSX.read(buf,{type:'array',sheets:0});SR=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:null})}}
+  if(!j){if(!SR||!K)return toast('Pilih KEDUA file Excel: Kontrol After Sales + Sales Detail','bad');j=buildData(SR,K.M,K.B,K.O)}
+  if(!j.members||!j.members.length)throw 0;D=j;prep();S.up={at:new Date().toISOString(),by:S.user.name};await BE.saveData(j);await BE.setting('last_upload',S.up);BE.log('UPLOAD DATA',files.map(f=>f.name).join(', '));toast('Data berhasil di-upload & tersinkron ke semua pengguna');render()}catch(e){console.error(e);toast('File tidak valid / gagal diproses','bad')}}
+document.addEventListener('copy',e=>{});addEventListener('keydown',e=>{if(S.user&&!isEd()&&(e.ctrlKey||e.metaKey)&&['s','p'].includes(e.key.toLowerCase())){e.preventDefault();deny('Download / cetak halaman')}});
+/* ---------- pemisahan Data Member (>1x) dan Belum / 1x Transaksi ---------- */
+function pager(n,P){const pages=Math.ceil(n/P)||1;return '<div class="flt" style="margin-top:10px"><button class="b x" onclick="S.pg=Math.max(0,S.pg-1);render()">◀</button> Hal '+(S.pg+1)+'/'+pages+' <button class="b x" onclick="S.pg=Math.min('+(pages-1)+',S.pg+1);render()">▶</button></div>'}
+V.member=()=>{const L=msort(filt()),P=50;return '<h2>Data Member <small class="mu">('+(S.f.all?'semua member termasuk 1x':'transaksi lebih dari 1x')+' · '+L.length.toLocaleString('id-ID')+' member)</small></h2>'+(S.f.all?'<p><span class="chip cC">Menampilkan semua member termasuk yang 1x</span> <button class="lnk" onclick="go(\'member\',{})">Kembali ke transaksi lebih dari 1x</button></p>':'')+flt()+tbl(MH,memRows(L.slice(S.pg*P,S.pg*P+P)),'620px')+pager(L.length,P)};
+V.belum=()=>{const one=D.members.filter(m=>m.tc===1),L=msort(filt()),P=50,nq=(S.nq||'').toLowerCase(),N=D.new.filter(x=>!nq||String(x[0]).includes(nq)||String(x[1]).toLowerCase().includes(nq)||String(x[2]).includes(nq));
+ return '<h2>Member Belum Transaksi / Baru 1x Transaksi</h2><div class="grid">'+kpi('Belum pernah transaksi',D.new.length,'n',"")+kpi('Transaksi 1x',one.length,'n',"",'Sudah FU: '+one.filter(fuOf).length)+'</div>'+
+ '<h3 style="margin-top:14px">Member transaksi 1x <small class="mu">('+L.length.toLocaleString('id-ID')+' member sesuai filter)</small></h3>'+flt()+tbl(MH,memRows(L.slice(S.pg*P,S.pg*P+P)),'520px')+pager(L.length,P)+
+ '<div class="card" style="margin-top:14px"><h3>Belum pernah transaksi ('+N.length.toLocaleString('id-ID')+')</h3><div class="flt"><input placeholder="Cari nama / no member / HP" value="'+esc(S.nq||'')+'" onchange="S.nq=this.value;render()"></div>'+
+ tbl(['No Member','Nama','WhatsApp'],N.slice(0,100).map(x=>[x[0],esc(x[1]),x[2]?'<a class="b g" target="_blank" href="https://wa.me/'+ph(x[2])+'?text='+encodeURIComponent(S.script.replace(/{nama}/g,x[1]).replace(/{item}/g,'belanja Anda').replace(/{sales}/g,'Tim Mitra10 Bitung Cikupa').replace(/{pic}/g,'-').replace(/{pdd}/g,'-'))+'">💬 '+esc(x[2])+'</a>':'-']),'260px')+(N.length>100?'<small class="mu">Menampilkan 100 pertama, gunakan pencarian untuk mempersempit.</small>':'')+'</div>'};
+
+loadEmb().then(j=>{D=j;boot()}).catch(e=>{document.getElementById('login').innerHTML='<p style="margin:auto;color:#fca5a5;padding:30px">Browser tidak mendukung pembukaan data terkompres. Gunakan Chrome/Edge/Safari versi terbaru.</p>'});
+</script></body></html>
