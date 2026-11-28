@@ -156,6 +156,25 @@ const BE={
  sub(){let t;const rf=()=>{clearTimeout(t);t=setTimeout(async()=>{const n0=cntBad(),r0=rrPend();await BE.load();if(S.maintenance&&S.maintenance.active&&!isOw()){S.user=null;return showMaintenance()}if(!S.maintenance?.active&&!S.user&&$('login')?.innerText.includes('Sistem Terkunci'))return showLogin('Sistem sudah dibuka kembali oleh Owner. Silakan login.');if(isOw()&&cntBad()>n0)ownerAlert();if(isEd()&&rrPend()>r0)rrAlert();render(true)},400)};if(bc)bc.onmessage=rf;addEventListener('storage',rf);
   if(!demo)sb.channel('m10').on('postgres_changes',{event:'*',schema:'public'},async p=>{if(p.table=='m10_profiles'&&p.eventType==='DELETE'&&p.old&&p.old.id===S.uid){kickOut('deleted');return}if(p.table=='m10_profiles'&&p.new&&p.new.id===S.uid&&p.new.status!=='approved'){kickOut(p.new.status);return}if(p.table=='m10_profiles'&&p.new&&p.new.id===S.uid&&p.new.role&&S.user&&p.new.role!==S.user.role){S.user.role=p.new.role;toast('Peran Anda sekarang: '+p.new.role+'. Muat ulang halaman untuk memperbarui menu.','ok','🔔 ');render(true)}if(p.table=='m10_datasets'&&p.eventType==='INSERT'){const j=await BE.loadData();if(j){D=j;BASE_D=JSON.parse(JSON.stringify(j));prep() }}if(p.table=='m10_settings'&&p.new&&p.new.key=='last_upload'){const j=await BE.loadData();if(j){D=j;BASE_D=JSON.parse(JSON.stringify(j));prep() }}rf()}).subscribe()}
 };
+/* ---------- login protection: 3 failed attempts = 30s cooldown (per browser) ---------- */
+const LOGIN_GUARD_KEY='m10_login_guard_v1';
+let loginGuardTimer=null;
+function getLoginGuard(){try{return JSON.parse(localStorage.getItem(LOGIN_GUARD_KEY)||'{}')}catch(e){return {}}}
+function loginWaitLeft(){const g=getLoginGuard();return Math.max(0,Math.ceil(((g.until||0)-Date.now())/1000))}
+function setLoginGuardUI(){
+ const b=$('loginBtn'),m=$('lm');if(!b)return;
+ const left=loginWaitLeft();
+ if(left>0){b.disabled=true;b.textContent='Tunggu '+left+' detik';if(m)m.textContent='Terlalu banyak percobaan login gagal. Silakan tunggu '+left+' detik sebelum mencoba kembali.'}
+ else if(!b.dataset.busy){b.disabled=false;b.textContent='Masuk'}
+ if(loginGuardTimer){clearInterval(loginGuardTimer);loginGuardTimer=null}
+ if(left>0)loginGuardTimer=setInterval(()=>{const n=loginWaitLeft();if(n>0){b.disabled=true;b.textContent='Tunggu '+n+' detik';if(m)m.textContent='Silakan tunggu '+n+' detik sebelum mencoba login kembali.'}else{clearInterval(loginGuardTimer);loginGuardTimer=null;localStorage.removeItem(LOGIN_GUARD_KEY);b.disabled=false;b.textContent='Masuk';if(m)m.textContent='Waktu tunggu selesai. Silakan coba login kembali.'}},250);
+}
+function recordLoginFailure(){
+ const g=getLoginGuard();g.count=(g.count||0)+1;
+ if(g.count>=3){g.count=0;g.until=Date.now()+30000;localStorage.setItem(LOGIN_GUARD_KEY,JSON.stringify(g));setLoginGuardUI();return true}
+ localStorage.setItem(LOGIN_GUARD_KEY,JSON.stringify(g));return false;
+}
+function resetLoginGuard(){try{localStorage.removeItem(LOGIN_GUARD_KEY)}catch(e){}if(loginGuardTimer){clearInterval(loginGuardTimer);loginGuardTimer=null}}
 /* ---------- login ---------- */
 function showLogin(msg){$('app').style.display='none';$('login').style.display='flex';let m=1;
  $('login').innerHTML=`<div class="card">${brand(70)}<h2 style="margin-top:14px">Kontrol Member <small class="mu" style="font-weight:400">v9.0</small></h2><p class="mu">Login dengan email yang sudah didaftarkan</p>
@@ -163,15 +182,16 @@ function showLogin(msg){$('app').style.display='none';$('login').style.display='
  <p style="color:#fca5a5;min-height:18px" id="lm">${msg||''}</p><button id="loginBtn" class="b o" style="width:100%;padding:10px" onclick="doLogin(0)">Masuk</button>
  <button id="registerBtn" class="b x" style="width:100%;margin-top:6px" onclick="doLogin(1)">Daftar (menunggu persetujuan Owner/Editor)</button>
  <button class="lnk" style="margin-top:12px" onclick="showForgot()">🔑 Lupa password?</button>
- ${demo?'<small class="mu">Mode demo (Supabase belum diisi)</small>':''}</div>`}
+ ${demo?'<small class="mu">Mode demo (Supabase belum diisi)</small>':''}</div>`;setLoginGuardUI()}
 function demoIn(r){enter({email:r+'@demo.local',name:r=='owner'?'Owner':'Sales Demo',role:r})}
 function setLoginLoading(on,label){
  const b=$('loginBtn'),r=$('registerBtn'),m=$('lm');
- if(b){b.disabled=!!on;b.innerHTML=on?`<span class="login-spinner" aria-hidden="true"></span>${label||'Sedang memproses login…'}`:'Masuk'}
+ if(b){b.dataset.busy=on?'1':'';b.disabled=!!on;b.innerHTML=on?`<span class="login-spinner" aria-hidden="true"></span>${label||'Sedang memproses login…'}`:'Masuk';if(!on)setLoginGuardUI()}
  if(r)r.disabled=!!on;
  if(m&&on)m.textContent='';
 }
 async function doLogin(reg){
+ if(!reg&&loginWaitLeft()>0){setLoginGuardUI();return}
  const e=$('le').value.trim(),p=$('lp').value;
  if(!e||!p)return $('lm').textContent='Isi email dan password';
  setLoginLoading(true,reg?'Memproses pendaftaran…':'Memverifikasi akun…');
@@ -181,15 +201,16 @@ async function doLogin(reg){
    const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(e.toLowerCase()+':'+p));
    const k=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
    if(reg){$('lm').textContent='Pendaftaran akun baru butuh Supabase (mode demo hanya 2 akun)';return}
-   if(U[k]){await enter(U[k]);return}
-   $('lm').textContent='Email atau password salah';return;
+   if(U[k]){resetLoginGuard();await enter(U[k]);return}
+   const locked=recordLoginFailure();$('lm').textContent=locked?'Tiga kali salah login. Login dikunci selama 30 detik.':'Email atau password salah. Percobaan gagal '+(getLoginGuard().count||0)+'/3.';return;
   }
   if(reg){
    const r=await sb.auth.signUp({email:e,password:p,options:{data:{name:$('ln').value||e}}});
    $('lm').textContent=r.error?r.error.message:'Terdaftar. Tunggu persetujuan Owner/Editor.';return;
   }
   const r=await sb.auth.signInWithPassword({email:e,password:p});
-  if(r.error){const em=r.error.message||'';$('lm').textContent=/fetch|network/i.test(em)?'Tidak bisa terhubung ke server Supabase. Buka lewat link GitHub Pages/Netlify (bukan di claude.ai atau file lokal) dan cek internet.':/not confirmed/i.test(em)?'Email belum dikonfirmasi: matikan Confirm email di Supabase atau klik link di email.':'Email/password salah, atau akun belum didaftarkan (klik Daftar dulu).';return}
+  if(r.error){const em=r.error.message||'';if(r.error.code==='invalid_credentials'||/invalid login credentials/i.test(em)){const locked=recordLoginFailure();$('lm').textContent=locked?'Tiga kali salah login. Login dikunci selama 30 detik.':'Email/password salah. Percobaan gagal '+(getLoginGuard().count||0)+'/3.'}else{$('lm').textContent=/fetch|network/i.test(em)?'Tidak bisa terhubung ke server Supabase. Buka lewat link GitHub Pages/Netlify (bukan di claude.ai atau file lokal) dan cek internet.':/not confirmed/i.test(em)?'Email belum dikonfirmasi: matikan Confirm email di Supabase atau klik link di email.':em}return}
+  resetLoginGuard();
   $('loginBtn').innerHTML='<span class="login-spinner" aria-hidden="true"></span>Login berhasil, memuat dashboard…';
   await boot();
  }catch(x){console.error('Login error:',x);const m=$('lm');if(m)m.textContent='Login gagal diproses. Periksa koneksi internet lalu coba kembali.';}
